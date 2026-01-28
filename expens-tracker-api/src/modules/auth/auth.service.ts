@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { prisma } from "../../config/database.js";
 import { jwtConfig, jwtRefreshToken } from "../../config/jwt.js";
+import crypto from "node:crypto";
 
 export class AuthService {
   async authenticate({ email, password }: any) {
@@ -62,5 +63,52 @@ export class AuthService {
     await prisma.refreshToken.deleteMany({
       where: { token: refreshToken },
     });
+  }
+  async forgotPassword(email: string) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return;
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+    await prisma.passwordResetToken.create({
+      data: {
+        tokenHash,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+      },
+    });
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
+
+    console.log(resetLink);
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+    const resetToken = await prisma.passwordResetToken.findFirst({
+      where: {
+        tokenHash,
+        used: false,
+        expiresAt: { gt: new Date() },
+      },
+      include: { user: true },
+    });
+
+    if (!resetToken) {
+      throw new Error("Token invalido ou expirado");
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: resetToken.userId },
+        data: { password: hashedPassword },
+      }),
+      prisma.passwordResetToken.update({
+        where: { id: resetToken.id },
+        data: { used: true },
+      }),
+    ]);
   }
 }
