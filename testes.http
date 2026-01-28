@@ -23,3 +23,13 @@ content-type: application/json
   "email": "marcus@example2.com",
   "password": "senha123456"
 }
+
+###
+
+### Logout
+POST http://localhost:3333/api/auth/logout HTTP/1.1
+content-type: application/json
+
+{
+  "email": "marcus@example2.com"
+}
