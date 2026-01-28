@@ -1,0 +1,25 @@
+### Health Check
+GET http://localhost:3333/api/health HTTP/1.1
+
+###
+
+### Registrar Novo Usuário
+POST http://localhost:3333/api/users/register HTTP/1.1
+content-type: application/json
+
+{
+  "name": "Marcus Phellypp Silva",
+  "email": "marcus@example2.com",
+  "password": "senha123456"
+}
+
+###
+
+### Login
+POST http://localhost:3333/api/auth/login HTTP/1.1
+content-type: application/json
+
+{
+  "email": "marcus@example2.com",
+  "password": "senha123456"
+}
