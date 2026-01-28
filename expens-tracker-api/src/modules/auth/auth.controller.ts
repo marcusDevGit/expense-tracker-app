@@ -46,4 +46,25 @@ export class AuthController {
       return res.status(500).json({ error: err.message });
     }
   }
+  async forgotPassword(req: Request, res: Response) {
+    try {
+      await authService.forgotPassword(req.body.email);
+      return res.json({
+        message:
+          "Se o email existir, você receberá instruções de como recuperar a senha",
+      });
+    } catch {
+      return res.sendStatus(500);
+    }
+  }
+  async resetPassword(req: Request, res: Response) {
+    try {
+      const { token, password } = req.body;
+      await authService.resetPassword(token, password);
+
+      return res.json({ message: "Senha redefinida com sucesso" });
+    } catch (err: any) {
+      return res.status(400).json({ error: err.message });
+    }
+  }
 }
