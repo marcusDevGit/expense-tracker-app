@@ -7,14 +7,15 @@ export function authMiddleware(
   res: Response,
   next: NextFunction,
 ) {
-  const authHeader = req.headers.authorization?.replace("Bearer", " ");
-  if (!authHeader) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith("Bearer")) {
     return res
       .status(401)
       .json({ error: "Token de autenticação não fornecido" });
   }
+  const token = authHeader.split(" ")[1];
   try {
-    const decode = jwt.verify(authHeader, jwtConfig.secret) as JwtPayload;
+    const decode = jwt.verify(token, jwtConfig.secret) as JwtPayload;
     req.userId = decode.sub as string;
     next();
   } catch (err: any) {
