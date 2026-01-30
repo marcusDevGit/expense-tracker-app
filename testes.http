@@ -23,3 +23,34 @@ content-type: application/json
   "email": "marcus@example2.com",
   "password": "senha123456"
 }
+
+###
+
+### Logout
+POST http://localhost:3333/api/auth/logout HTTP/1.1
+content-type: application/json
+
+{
+  "email": "marcus@example2.com"
+}
+
+###
+
+### Forgot Password
+POST http://localhost:3333/api/auth/forgot-password HTTP/1.1
+content-type: application/json
+
+{
+  "email": "marcus@example2.com"
+}
+
+###
+
+### Reset Password
+POST http://localhost:3333/api/auth/reset-password HTTP/1.1
+content-type: application/json
+
+{
+  "token": "<token>",
+  "password": "[PASSWORD]"
+}

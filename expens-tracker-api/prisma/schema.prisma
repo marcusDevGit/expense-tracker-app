@@ -13,14 +13,16 @@ datasource db {
 }
 
 model User {
-  id         String     @id @default(cuid())
-  name       String
-  email      String     @unique
-  password   String
-  wallets    Wallet[]
-  categories Category[]
-  CreatedAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  id           String         @id @default(uuid())
+  name         String
+  email        String         @unique
+  password     String
+  wallets      Wallet[]
+  categories   Category[]
+  refreshToken RefreshToken[]
+  passwordResetToken PasswordResetToken[]
+  CreatedAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 }
 
 model Wallet {
@@ -72,4 +74,26 @@ enum RecurrenceType {
   WEEKLY
   MONTHLY
   YEARLY
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+model PasswordResetToken {
+  id String @id @default(uuid())
+  tokenHash String
+  userId String
+  expiresAt DateTime
+  used Boolean @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tokenHash])
 }
