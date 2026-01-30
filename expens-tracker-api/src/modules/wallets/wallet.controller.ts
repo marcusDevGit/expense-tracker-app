@@ -6,6 +6,21 @@ const walletService = new WalletService();
 const expenseService = new ExpenseService();
 
 export class WalletController {
+  async create(req: Request, res: Response) {
+    try {
+      const userId = req.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: "Usuário não autenticado" });
+      }
+
+      const wallet = await walletService.create(userId, req.body);
+      return res.status(201).json(wallet);
+    } catch (err: any) {
+      return res.status(400).json({ error: err.message });
+    }
+  }
+
   async list(req: Request, res: Response) {
     try {
       const userId = req.userId;
@@ -19,6 +34,69 @@ export class WalletController {
     }
   }
 
+  async show(req: Request, res: Response) {
+    try {
+      const userId = req.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: "Usuário não autenticado" });
+      }
+
+      const { id } = req.params;
+
+      if (!id || typeof id !== "string") {
+        return res.status(400).json({ error: "ID da carteira inválido" });
+      }
+
+      const wallet = await walletService.findById(userId, id);
+      return res.json(wallet);
+    } catch (err: any) {
+      return res.status(400).json({ error: err.message });
+    }
+  }
+
+  async update(req: Request, res: Response) {
+    try {
+      const userId = req.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: "Usuário não autenticado" });
+      }
+
+      const { id } = req.params;
+
+      if (!id || typeof id !== "string") {
+        return res.status(400).json({ error: "ID da carteira inválido" });
+      }
+
+      const wallet = await walletService.update(userId, id, req.body);
+      return res.json(wallet);
+    } catch (err: any) {
+      return res.status(400).json({ error: err.message });
+    }
+  }
+
+  async delete(req: Request, res: Response) {
+    try {
+      const userId = req.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: "Usuário não autenticado" });
+      }
+
+      const { id } = req.params;
+
+      if (!id || typeof id !== "string") {
+        return res.status(400).json({ error: "ID da carteira inválido" });
+      }
+
+      await walletService.delete(userId, id);
+      return res.status(204).send();
+    } catch (err: any) {
+      return res.status(400).json({ error: err.message });
+    }
+  }
+
   async dashboard(req: Request, res: Response) {
     try {
       const userId = req.userId;
@@ -27,19 +105,19 @@ export class WalletController {
         return res.status(401).json({ error: "Usuário não autenticado" });
       }
 
-      const { walletId } = req.params;
+      const { id } = req.params;
 
-      if (!walletId || typeof walletId !== "string") {
+      if (!id || typeof id !== "string") {
         return res.status(400).json({ error: "ID da carteira inválido" });
       }
 
       const { month, year } = req.query;
 
-      const wallet = await walletService.getWalletWithBalance(userId, walletId);
+      const wallet = await walletService.getWalletWithBalance(userId, id);
 
       const expenses = await expenseService.listByMonth(
-        String(userId),
-        String(walletId),
+        userId,
+        id,
         Number(month),
         Number(year),
       );
