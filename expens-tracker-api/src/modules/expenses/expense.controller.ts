@@ -44,6 +44,22 @@ export class ExpenseController {
       return res.status(400).json({ error: err.message });
     }
   }
+  async show(req: Request, res: Response) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        return res.status(401).json({ error: "Usuário não autenticado" });
+      }
+      const { id } = req.params;
+      if (!id || typeof id !== "string") {
+        return res.status(400).json({ error: "ID da despesa inválido" });
+      }
+      const expense = await expenseService.findById(userId, id);
+      return res.json(expense);
+    } catch (err: any) {
+      return res.status(400).json({ error: err.message });
+    }
+  }
 
   async update(req: Request, res: Response) {
     try {
