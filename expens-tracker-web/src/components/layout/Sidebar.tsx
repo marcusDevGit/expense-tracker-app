@@ -12,7 +12,7 @@ const menuItems = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/" },
   { label: "Carteiras", icon: Wallet, path: "/wallets" },
   { label: "Despesas", icon: Receipt, path: "/expenses" },
-  { label: "Categorias", icon: BarChart3, path: "/categorias" },
+  { label: "Categorias", icon: BarChart3, path: "/categories" },
   { label: "Configurações", icon: Settings, path: "/settings" },
 ];
 

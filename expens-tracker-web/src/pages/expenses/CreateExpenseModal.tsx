@@ -1,0 +1,148 @@
+import { useState } from "react";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { expenseService } from "@/services/expense.service";
+import { walletService } from "@/services/wallet.service";
+import { categoryService } from "@/services/category.service";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { X, Loader2 } from "lucide-react";
+
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export function CreateExpenseModal({ isOpen, onClose }: Props) {
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [expenseDate, setExpenseDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
+  const [walletId, setWalletId] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const { data: wallets } = useQuery({
+    queryKey: ["wallets"],
+    queryFn: walletService.list,
+  });
+  const { data: categories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: categoryService.list,
+  });
+
+  const mutation = useMutation({
+    mutationFn: expenseService.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["expenses"] });
+      queryClient.invalidateQueries({ queryKey: ["wallets"] });
+      queryClient.invalidateQueries({ queryKey: ["stats"] });
+      toast({ title: "Sucesso", description: "Despesa criada" });
+      onClose();
+    },
+  });
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-2xl p-6 animate-in zoom-in duration-200">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-bold">Nova Despesa</h2>
+          <Button variant="ghost" onClick={onClose}>
+            <X size={20} />
+          </Button>
+        </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            mutation.mutate({
+              description,
+              amount: Number(amount),
+              expenseDate,
+              walletId,
+              categoryId,
+            });
+          }}
+          className="space-y-4"
+        >
+          <div className="space-y-2">
+            <Label>Descrição</Label>
+            <Input
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              required
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-2">
+              <Label>Valor</Label>
+              <Input
+                type="number"
+                step={0.01}
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Data</Label>
+              <Input
+                type="date"
+                value={expenseDate}
+                onChange={(e) => setExpenseDate(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Carteira</Label>
+            <select
+              className="w-full border rounded-md p-2"
+              value={walletId}
+              onChange={(e) => setWalletId(e.target.value)}
+              required
+            >
+              <option value="">Selecione uma carteira</option>
+              {wallets?.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <Label>Categoria</Label>
+            <select
+              className="w-full border rounded-md p-2"
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
+              required
+            >
+              <option value="">Selecione uma categoria</option>
+              {categories?.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <Button
+            type="submit"
+            disabled={mutation.isPending}
+            className="w-full"
+          >
+            {mutation.isPending ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              "Salvar Despesa"
+            )}
+          </Button>
+        </form>
+      </div>
+    </div>
+  );
+}
