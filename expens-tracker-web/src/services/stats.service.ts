@@ -1,8 +1,8 @@
 import { api } from "./api";
 
 export interface DashboardStats {
-    month: { total: number; count: number }
-    categoryBreakdown: { name: string; total: number; color: string | null; percentage: number }[];
+    month: { totalExpense: number; count: number }
+    categoryBreakdown: { name: string; total: number; percentage: number }[];
 }
 
 export const statsService = {

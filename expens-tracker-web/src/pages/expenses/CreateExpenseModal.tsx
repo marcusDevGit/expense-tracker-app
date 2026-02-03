@@ -6,6 +6,7 @@ import { categoryService } from "@/services/category.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { X, Loader2 } from "lucide-react";
 
@@ -15,6 +16,10 @@ interface Props {
 }
 
 export function CreateExpenseModal({ isOpen, onClose }: Props) {
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrenceType, setRecurrenceType] = useState<
+    "WEEKLY" | "MONTHLY" | "YEARLY"
+  >("MONTHLY");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [expenseDate, setExpenseDate] = useState(
@@ -65,6 +70,8 @@ export function CreateExpenseModal({ isOpen, onClose }: Props) {
               expenseDate,
               walletId,
               categoryId,
+              isRecurring,
+              recurrenceType: isRecurring ? recurrenceType : undefined,
             });
           }}
           className="space-y-4"
@@ -130,6 +137,29 @@ export function CreateExpenseModal({ isOpen, onClose }: Props) {
               ))}
             </select>
           </div>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="recurring"
+              checked={isRecurring}
+              onCheckedChange={setIsRecurring}
+              className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+            />
+            <Label htmlFor="recurring">Recorrente</Label>
+          </div>
+          {isRecurring && (
+            <div className="space-y-2 animate-in slide-in-from-top-2 duration-200">
+              <Label>Recorrência</Label>
+              <select
+                className="w-full border rounded-md p-2"
+                value={recurrenceType}
+                onChange={(e) => setRecurrenceType(e.target.value as any)}
+              >
+                <option value="WEEKLY">Semanal</option>
+                <option value="MONTHLY">Mensal</option>
+                <option value="YEARLY">Anual</option>
+              </select>
+            </div>
+          )}
           <Button
             type="submit"
             disabled={mutation.isPending}

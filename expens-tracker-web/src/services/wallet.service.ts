@@ -14,8 +14,7 @@ export const walletService = {
         return response.data
     },
     async create(data: { name: string; color: string; initialBalance: number }) {
-        const { color, ...payload } = data;
-        const response = await api.post<Wallet>("/wallets", payload);
+        const response = await api.post<Wallet>("/wallets", data);
         return response.data
     },
     async delete(id: string) {
