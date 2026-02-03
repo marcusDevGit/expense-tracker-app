@@ -58,7 +58,7 @@ model Expense {
   amount          Decimal
   expenseDate     DateTime
   isRecurring     Boolean         @default(false)
-  recurrencetType RecurrenceType?
+  recurrenceType  RecurrenceType?
   walletId        String
   categoryId      String
   wallet          Wallet          @relation(fields: [walletId], references: [id])
