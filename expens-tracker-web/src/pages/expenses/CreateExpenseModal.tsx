@@ -147,7 +147,7 @@ export function CreateExpenseModal({ isOpen, onClose }: Props) {
               <option value="NEW">Nova Categoria</option>
               {categories?.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.name}
+                  {c.icon} {c.name}
                 </option>
               ))}
             </select>

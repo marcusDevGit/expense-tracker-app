@@ -4,6 +4,7 @@ export interface Category {
     id: string;
     name: string;
     color: string | null;
+    icon: string | null;
 }
 
 export const categoryService = {
@@ -11,8 +12,12 @@ export const categoryService = {
         const response = await api.get<Category[]>("/categories");
         return response.data;
     },
-    async create(name: string) {
-        const response = await api.post<Category>("/categories", { name })
+    async create(name: string, color?: string, icon?: string) {
+        const response = await api.post<Category>("/categories", { name, color, icon })
+        return response.data
+    },
+    async update(id: string, name: string, color?: string, icon?: string) {
+        const response = await api.put<Category>(`/categories/${id}`, { name, color, icon })
         return response.data
     },
     async delete(id: string) {

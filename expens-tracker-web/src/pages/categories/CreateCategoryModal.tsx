@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { categoryService } from "@/services/category.service";
 import { Button } from "@/components/ui/button";
@@ -12,25 +12,78 @@ interface Props {
   onClose: () => void;
 }
 
-export function CreateCategoryModal({ isOpen, onClose }: Props) {
+export function CreateCategoryModal({ isOpen, onClose, category }: Props) {
   const [name, setName] = useState("");
+  const [color, setColor] = useState("#6366f1");
+  const [icon, setIcon] = useState("🏷️");
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
+  const COLORS = [
+    "#6366f1",
+    "#ec4899",
+    "#f59e0b",
+    "#10b981",
+    "#ef4444",
+    "#8b5cf6",
+    "#06b6d4",
+    "#f97316",
+    "#3b82f6",
+    "#94a3b8",
+    "#1e293b",
+    "#f5f5f5",
+    "#ffffff",
+  ];
+
+  const EMOJIS = [
+    "🏷️",
+    "🍔",
+    "🚗",
+    "🏠",
+    "🎓",
+    "💰",
+    "✈️",
+    "⚽",
+    "🎨",
+    "💻",
+    "💊",
+    "🛒",
+    "💡",
+    "🎮",
+    "📚",
+    "🏋️",
+    "🎭",
+    "🎬",
+    "🎤",
+    "🎸",
+    "🎹",
+    "🎻",
+    "🎺",
+    "🎷",
+    "🥁",
+  ];
+
+  useEffect(() => {
+    if (category) {
+      setName(category.name);
+      setColor(category.color || "#6366f1");
+      setIcon(category.icon || "🏷️");
+    } else {
+      setName("");
+      setColor("#6366f1");
+      setIcon("🏷️");
+    }
+  }, [category, isOpen]);
+
   const mutation = useMutation({
-    mutationFn: categoryService.create,
+    mutationFn: (data: { name: string; color?: string; icon?: string }) =>
+      category
+        ? categoryService.update(category.id, data.name, data.color, data.icon)
+        : categoryService.create(data.name, data.color, data.icon),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast({ title: "Sucesso!", description: "Categoria criada com sucesso" });
       onClose();
-    },
-    onError: (error) => {
-      toast({
-        title: "Erro",
-        description:
-          "Falha ao criar categoria. Verifique se já existe uma categoria com esse nome.",
-        variant: "destructive",
-      });
     },
   });
   if (!isOpen) return null;
@@ -39,7 +92,9 @@ export function CreateCategoryModal({ isOpen, onClose }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="w-full max-w-md bg-white rounded-xl p-6 shadow-2xl animate-in zoom-in duration-200">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold">Nova Categoria</h2>
+          <h2 className="text-xl font-bold">
+            {category ? "Editar Categoria" : "Nova Categoria"}
+          </h2>
           <Button variant="ghost" onClick={onClose} size="icon">
             <X size={20} />
           </Button>
@@ -47,7 +102,7 @@ export function CreateCategoryModal({ isOpen, onClose }: Props) {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            mutation.mutate(name);
+            mutation.mutate({ name, color, icon });
           }}
           className="space-y-4"
         >
@@ -62,6 +117,36 @@ export function CreateCategoryModal({ isOpen, onClose }: Props) {
               autoFocus
             />
           </div>
+          <div className="space-y-3">
+            <Label>Cor</Label>
+            <div className="flex flex-wrap gap-2">
+              {COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setColor(c)}
+                  className={`w-8 h-8 rounded-full border-2 transition-transform hover:scale-110 ${color === c ? "border-slate-900 scale-110" : "border-transparent"}`}
+                  style={{ backgroundColor: c }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label>Icone / Emoje</Label>
+            <div className="grid grid-cols-5 gap-2 border rounded-md p-2">
+              {EMOJIS.map((e) => (
+                <button
+                  key={e}
+                  type="button"
+                  onClick={() => setIcon(e)}
+                  className={`text-2xl p-2 rounded hover:bg-slate-100 ${icon === e ? "bg-slate-200" : ""}`}
+                >
+                  {e}
+                </button>
+              ))}
+            </div>
+          </div>
           <Button
             type="submit"
             className="w-full"
@@ -69,6 +154,8 @@ export function CreateCategoryModal({ isOpen, onClose }: Props) {
           >
             {mutation.isPending ? (
               <Loader2 className="animate-spin" />
+            ) : category ? (
+              "Salva Alterações"
             ) : (
               "Criar Categoria"
             )}

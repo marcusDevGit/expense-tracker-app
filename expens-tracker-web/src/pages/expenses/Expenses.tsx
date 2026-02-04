@@ -171,7 +171,8 @@ export function Expenses() {
                           {formatDate(expense.expenseDate)}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Tag size={12} /> {expense.category.name}
+                          <Tag size={12} />
+                          {expense.category?.name || "Sem Categoria"}
                         </span>
                       </div>
                     </div>

@@ -12,13 +12,13 @@ export class CategoryController {
         return res.status(401).json({ error: "Usuário não autenticado" });
       }
 
-      const { name } = req.body;
+      const { name, color, icon } = req.body;
 
       if (!name) {
         return res.status(400).json({ error: "Nome é obrigatório" });
       }
 
-      const category = await categoryService.create(userId, name);
+      const category = await categoryService.create(userId, name, color, icon);
       return res.status(201).json(category);
     } catch (err: any) {
       return res.status(400).json({ error: err.message });
@@ -75,13 +75,13 @@ export class CategoryController {
         return res.status(400).json({ error: "ID da categoria inválido" });
       }
 
-      const { name } = req.body;
+      const { name, color, icon } = req.body;
 
       if (!name) {
         return res.status(400).json({ error: "Nome é obrigatório" });
       }
 
-      const category = await categoryService.update(userId, id, name);
+      const category = await categoryService.update(userId, id, name, color, icon);
       return res.json(category);
     } catch (err: any) {
       return res.status(400).json({ error: err.message });
