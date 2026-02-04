@@ -5,6 +5,7 @@ import {
   Receipt,
   Settings,
   BarChart3,
+  FileChartColumn,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +14,7 @@ const menuItems = [
   { label: "Carteiras", icon: Wallet, path: "/wallets" },
   { label: "Despesas", icon: Receipt, path: "/expenses" },
   { label: "Categorias", icon: BarChart3, path: "/categories" },
+  { label: "Relatórios", icon: FileChartColumn, path: "/reports" },
   { label: "Configurações", icon: Settings, path: "/settings" },
 ];
 

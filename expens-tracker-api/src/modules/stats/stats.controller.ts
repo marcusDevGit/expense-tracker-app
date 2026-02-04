@@ -9,15 +9,11 @@ export class StatsController {
             const userId = req.userId
             const { walletId, month, year } = req.query
 
-            console.log("Stats Request:", { userId, walletId, month, year })
-
             if (!userId) {
-                console.warn("Stats Error: Unauthorized")
-                return res.status(401).json({ error: "Não autorizado" })
+                return res.status(400).json({ error: "Não autorizado" })
             }
 
             if (!walletId || !month || !year) {
-                console.warn("Stats Error: Missing parameters")
                 return res.status(400).json({ error: "Parâmetros ausentes" })
             }
 
@@ -29,11 +25,30 @@ export class StatsController {
             )
             return res.json(stats)
         } catch (error) {
-            console.error("Stats Error:", error)
             return res.status(400).json({
                 error: "Erro ao buscar estatísticas",
                 details: error instanceof Error ? error.message : String(error)
             })
+        }
+    }
+
+    async getTrends(req: Request, res: Response) {
+        try {
+            const { walletId, limit } = req.query
+            const trends = await statsService.getMonthlyTrends(req.userId!, String(walletId), limit ? Number(limit) : 6);
+            return res.json(trends);
+        } catch (error) {
+            return res.status(400).json({ error: "Erro ao buscar tendências" })
+        }
+    }
+
+    async getComparison(req: Request, res: Response) {
+        try {
+            const { walletId, month, year } = req.query
+            const comparison = await statsService.getComparisonData(req.userId!, String(walletId), Number(month), Number(year))
+            return res.json(comparison)
+        } catch (error) {
+            return res.status(400).json({ error: "Erro ao buscar comparação" })
         }
     }
 }

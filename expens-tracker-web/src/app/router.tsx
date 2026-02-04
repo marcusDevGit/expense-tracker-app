@@ -1,3 +1,4 @@
+import { Reports } from "@/pages/reports/Reports";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Login } from "@/pages/auth/Login";
 import { Register } from "@/pages/auth/Register";
@@ -48,6 +49,14 @@ export function AppRoutes() {
           element={
             <PrivateRoute>
               <Categories />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/reports"
+          element={
+            <PrivateRoute>
+              <Reports />
             </PrivateRoute>
           }
         />

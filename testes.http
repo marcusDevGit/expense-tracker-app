@@ -1,5 +1,5 @@
 @token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbWwwNjYwYncwMDAwMm12MXdoM3ZxaWs4IiwiaWF0IjoxNzY5Nzg5NTk5LCJleHAiOjE3Njk4NzU5OTl9.W3jJF-Da-BrTmRw7Lr6x40OpETyDQ_PucSqlybzC3hI
-@email=marcus@example.com.br
+@email=marcus@example2.com
 
 ### Health Check
 GET http://localhost:3333/api/health HTTP/1.1
@@ -12,7 +12,7 @@ content-type: application/json
 
 {
   "name": "Marcus Phellypp",
-  "email": {{email}},
+  "email": "{{email}}",
   "password": "senha123456"
 }
 
@@ -202,9 +202,19 @@ Authorization: Bearer {{token}}
 # DASHBOARD (STATS)
 #####################
 
-### Obter Dados do Dashboard
-# Requer: walletId, month, year
+### Dashboard Stats (Novo)
 GET http://localhost:3333/api/stats/dashboard?walletId=fa13cab2-ae73-423c-a11a-0b410c5399e5&month=1&year=2026 HTTP/1.1
 Authorization: Bearer {{token}}
+
+### Trend Stats
+GET http://localhost:3333/api/stats/trends?walletId=fa13cab2-ae73-423c-a11a-0b410c5399e5&limit=6 HTTP/1.1
+Authorization: Bearer {{token}}
+
+### Comparison Stats
+GET http://localhost:3333/api/stats/comparison?walletId=fa13cab2-ae73-423c-a11a-0b410c5399e5&month=1&year=2026 HTTP/1.1
+Authorization: Bearer {{token}}
+
+### Ping (Teste de Reload)
+GET http://localhost:3333/api/ping HTTP/1.1
 
 ###
