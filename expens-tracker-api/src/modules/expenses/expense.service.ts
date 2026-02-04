@@ -1,5 +1,6 @@
 import { prisma } from "../../config/database.js";
 import { Prisma } from "@prisma/client";
+import crypto from "crypto";
 
 export class ExpenseService {
   async create(
@@ -9,9 +10,12 @@ export class ExpenseService {
       amount: number;
       expenseDate: string;
       walletId: string;
-      categoryId: string;
+      categoryId?: string;
+      newCategoryName?: string;
       isRecurring: boolean;
       recurrenceType?: "WEEKLY" | "MONTHLY" | "YEARLY";
+      paymentMethod?: "CREDIT_CARD" | "DEBIT_CARD" | "PIX" | "CASH" | "BANK_TRANSFER" | "OTHER";
+      installments?: number
     },
   ) {
     const wallet = await prisma.wallet.findFirst({
@@ -22,22 +26,49 @@ export class ExpenseService {
     });
     if (!wallet) throw new Error("carteira invalida");
 
-    const category = await prisma.category.findFirst({
-      where: { id: data.categoryId, userId },
-    });
-    if (!category) throw new Error("categoria invalida");
+    if (data.categoryId) {
+      const category = await prisma.category.findFirst({
+        where: { id: data.categoryId, userId },
+      });
+      if (!category) throw new Error("categoria invalida");
+    }
 
-    return prisma.expense.create({
-      data: {
-        description: data.description,
-        amount: new Prisma.Decimal(data.amount),
-        expenseDate: new Date(data.expenseDate),
-        isRecurring: data.isRecurring ?? false,
-        recurrenceType: data.recurrenceType,
-        walletId: data.walletId,
-        categoryId: data.categoryId,
-      },
-    });
+    let categoryId = data.categoryId;
+    if (data.newCategoryName) {
+      const newCategory = await prisma.category.create({
+        data: {
+          id: crypto.randomUUID(),
+          name: data.newCategoryName,
+          userId,
+        },
+      });
+      categoryId = newCategory.id;
+    }
+
+    const installmentsCount = data.installments || 1
+    let firstExpense;
+
+    for (let i = 0; i < installmentsCount; i++) {
+      const date = new Date(data.expenseDate)
+      date.setMonth(date.getMonth() + i);
+
+      const expense = await prisma.expense.create({
+        data: {
+          description: installmentsCount > 1 ? `${data.description} (${i + 1}/${installmentsCount})` : data.description,
+          amount: new Prisma.Decimal(data.amount),
+          expenseDate: date,
+          isRecurring: data.isRecurring ?? false,
+          recurrenceType: data.recurrenceType,
+          paymentMethod: data.paymentMethod || "CASH",
+          installments: installmentsCount,
+          currentInstallment: i + 1,
+          walletId: data.walletId,
+          categoryId: categoryId || null,
+        },
+      });
+      if (i === 0) firstExpense = expense
+    }
+    return firstExpense
   }
 
   async processRecurring(userId: string) {

@@ -1,7 +1,12 @@
 import { prisma } from "../../config/database.js";
+import { ExpenseService } from "../expenses/expense.service.js";
+
+const expenseService = new ExpenseService();
 
 export class StatsService {
     async getDashboardData(userId: string, walletId: string, month: number, year: number) {
+        await expenseService.processRecurring(userId);
+
         const startDate = new Date(year, month - 1, 1);
         const endDate = new Date(year, month, 0, 23, 59, 59);
 
@@ -23,13 +28,12 @@ export class StatsService {
         const categoryMap: Record<string, { name: string, total: number }> = {};
 
         expenses.forEach(exp => {
-            const cat = exp.category;
-            if (!cat) return;
+            const catName = exp.category?.name || "Sem Categoria";
 
-            if (!categoryMap[cat.name]) {
-                categoryMap[cat.name] = { name: cat.name, total: 0 };
+            if (!categoryMap[catName]) {
+                categoryMap[catName] = { name: catName, total: 0 };
             }
-            categoryMap[cat.name].total += Number(exp.amount);
+            categoryMap[catName].total += Number(exp.amount);
         });
 
         const categoryBreakdown = Object.values(categoryMap).map(cat => ({

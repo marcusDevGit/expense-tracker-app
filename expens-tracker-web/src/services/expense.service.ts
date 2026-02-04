@@ -6,7 +6,8 @@ export interface Expense {
     amount: number
     expenseDate: string
     walletId: string
-    categoryId: string
+    categoryId?: string | null
+    newCategoryName?: string
     category: { name: string, color: string | null }
     isRecurring?: boolean
     recurrenceType?: "WEEKLY" | "MONTHLY" | "YEARLY"
@@ -23,9 +24,12 @@ export const expenseService = {
         amount: number;
         expenseDate: string
         walletId: string
-        categoryId: string
+        categoryId?: string
+        newCategoryName?: string
         isRecurring?: boolean
         recurrenceType?: "WEEKLY" | "MONTHLY" | "YEARLY"
+        paymentMethod?: any
+        installments: number
     }) {
         const response = await api.post<Expense>("/expenses", data)
         return response.data

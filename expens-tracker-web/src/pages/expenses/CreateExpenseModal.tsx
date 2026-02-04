@@ -20,6 +20,8 @@ export function CreateExpenseModal({ isOpen, onClose }: Props) {
   const [recurrenceType, setRecurrenceType] = useState<
     "WEEKLY" | "MONTHLY" | "YEARLY"
   >("MONTHLY");
+  const [paymentMethod, setPaymentMethod] = useState<string>("CASH");
+  const [installments, setInstallments] = useState(1);
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [expenseDate, setExpenseDate] = useState(
@@ -27,6 +29,8 @@ export function CreateExpenseModal({ isOpen, onClose }: Props) {
   );
   const [walletId, setWalletId] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -69,9 +73,12 @@ export function CreateExpenseModal({ isOpen, onClose }: Props) {
               amount: Number(amount),
               expenseDate,
               walletId,
-              categoryId,
+              categoryId: categoryId || undefined,
+              newCategoryName: newCategoryName || undefined,
               isRecurring,
               recurrenceType: isRecurring ? recurrenceType : undefined,
+              paymentMethod: paymentMethod as any,
+              installments: Number(installments),
             });
           }}
           className="space-y-4"
@@ -126,16 +133,32 @@ export function CreateExpenseModal({ isOpen, onClose }: Props) {
             <select
               className="w-full border rounded-md p-2"
               value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              required
+              onChange={(e) => {
+                if (e.target.value === "NEW") {
+                  setIsCreatingCategory(true);
+                  setCategoryId("");
+                } else {
+                  setIsCreatingCategory(false);
+                  setCategoryId(e.target.value);
+                }
+              }}
             >
-              <option value="">Selecione uma categoria</option>
+              <option value="">Sem Categoria</option>
+              <option value="NEW">Nova Categoria</option>
               {categories?.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
               ))}
             </select>
+            {isCreatingCategory && (
+              <Input
+                placeholder="Nome da nova categoria"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                required
+              />
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Checkbox
@@ -160,6 +183,35 @@ export function CreateExpenseModal({ isOpen, onClose }: Props) {
               </select>
             </div>
           )}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-2">
+              <Label>Forma de Pagamento</Label>
+              <select
+                className="w-full border rounded-md p-2 text-sm"
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                required
+              >
+                <option value="CASH">Dinheiro</option>
+                <option value="CREDIT_CARD">Cartão de Crédito</option>
+                <option value="DEBIT_CARD">Cartão de Débito</option>
+                <option value="PIX">Pix</option>
+                <option value="BANK_TRANSFER">Transferência</option>
+                <option value="OTHER">Outro</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label>Parcelas</Label>
+              <Input
+                type="number"
+                min={1}
+                max={48}
+                value={installments}
+                onChange={(e) => setInstallments(Number(e.target.value))}
+                required
+              />
+            </div>
+          </div>
           <Button
             type="submit"
             disabled={mutation.isPending}
