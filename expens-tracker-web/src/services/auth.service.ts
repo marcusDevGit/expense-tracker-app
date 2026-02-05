@@ -2,7 +2,7 @@ import { api } from "./api";
 
 interface AuthResponse {
     user: any;
-    token: string;
+    accessToken: string;
 }
 
 export const authService = {

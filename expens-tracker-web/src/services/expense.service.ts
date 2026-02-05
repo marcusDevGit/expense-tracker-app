@@ -23,7 +23,7 @@ export interface PaginatedResponse<T> {
 }
 
 export const expenseService = {
-    async list(params?: { walletId?: string; month?: number; year?: number; page?: number; limit?: number }) {
+    async list(params?: { walletId?: string; month?: number; year?: number; page?: number; limit?: number; categoryId?: string }) {
         const response = await api.get<PaginatedResponse<Expense>>("/expenses", { params })
         return response.data
     },

@@ -66,7 +66,9 @@ export function Wallets() {
                   </Button>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+                  <div
+                    className={`text-2xl font-bold ${wallet.currentBalance < 0 ? "text-red-500" : "text-slate-900"}`}
+                  >
                     {formatCurrency(wallet.currentBalance)}
                   </div>
                 </CardContent>

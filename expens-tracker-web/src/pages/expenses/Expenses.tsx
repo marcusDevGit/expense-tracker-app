@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { CreateExpenseModal } from "./CreateExpenseModal";
 import { expenseService } from "@/services/expense.service";
@@ -13,25 +13,30 @@ import {
   Receipt,
   Calendar as CalendarIcon,
   Tag,
-  Trash2,
-  Loader2,
+  Search,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { categoryService } from "@/services/category.service";
+import { Input } from "@/components/ui/input";
 
 export function Expenses() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   const now = new Date();
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [year, setYear] = useState(now.getFullYear());
   const [selectedWalletId, setSelectedWalletId] = useState<string>("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
 
   const { data: wallets } = useQuery({
     queryKey: ["wallets"],
     queryFn: walletService.list,
+  });
+
+  const { data: categories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: categoryService.list,
   });
 
   useEffect(() => {
@@ -40,25 +45,15 @@ export function Expenses() {
     }
   }, [wallets, selectedWalletId]);
 
-  const deleteMutation = useMutation({
-    mutationFn: expenseService.delete,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["expenses"] });
-      queryClient.invalidateQueries({ queryKey: ["wallets"] });
-      queryClient.invalidateQueries({ queryKey: ["stats"] });
-      toast({ title: "Sucesso", description: "Despesa deletada com sucesso!" });
-    },
-    onError: () => {
-      toast({
-        title: "Erro",
-        description: "Erro ao deletar despesa",
-        variant: "destructive",
-      });
-    },
-  });
-
   const { data: expensesResponse, isLoading } = useQuery({
-    queryKey: ["expenses", selectedWalletId, month, year, page],
+    queryKey: [
+      "expenses",
+      selectedWalletId,
+      month,
+      year,
+      page,
+      selectedCategoryId,
+    ],
     queryFn: () =>
       expenseService.list({
         walletId: selectedWalletId!,
@@ -66,6 +61,8 @@ export function Expenses() {
         year,
         page,
         limit: 10,
+        categoryId:
+          selectedCategoryId === "all" ? undefined : selectedCategoryId,
       }),
     enabled: !!selectedWalletId,
   });
@@ -145,6 +142,41 @@ export function Expenses() {
               ))}
             </select>
           </div>
+          <div className="flex-1 min-w-[150px]">
+            <Label className="text-xs text-slate-500 mb-1 block">
+              Categoria
+            </Label>
+            <select
+              className="w-full border rounded-md p-2 text-sm"
+              value={selectedCategoryId}
+              onChange={(e) => {
+                setSelectedCategoryId(e.target.value);
+                setPage(1);
+              }}
+            >
+              <option value="all">Todas as Categorias</option>
+              {categories?.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.icon} {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="w-full relative">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              size={16}
+            />
+            <Input
+              placeholder="Buscar por descrição..."
+              className="pl-10"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(1);
+              }}
+            />
+          </div>
         </div>
 
         <div className="grid gap-2">
@@ -158,38 +190,44 @@ export function Expenses() {
             </div>
           ) : (
             <>
-              {expenses?.map((expense) => (
-                <Card
-                  key={expense.id}
-                  className="overflow-hidden border-slate-200"
-                >
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="bg-red-50 p-2 rounded-lg text-red-600">
-                        <Receipt size={20} />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-slate-900">
-                          {expense.description}
-                        </p>
-                        <div className="flex gap-3 text-xs text-slate-500 mt-1">
-                          <span className="flex items-center gap-1">
-                            <CalendarIcon size={12} />
-                            {formatDate(expense.expenseDate)}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Tag size={12} />
-                            {expense.category?.name || "Sem Categoria"}
-                          </span>
+              {expenses
+                ?.filter((exp) =>
+                  exp.description
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase()),
+                )
+                .map((expense) => (
+                  <Card
+                    key={expense.id}
+                    className="overflow-hidden border-slate-200"
+                  >
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="bg-red-50 p-2 rounded-lg text-red-600">
+                          <Receipt size={20} />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-900">
+                            {expense.description}
+                          </p>
+                          <div className="flex gap-3 text-xs text-slate-500 mt-1">
+                            <span className="flex items-center gap-1">
+                              <CalendarIcon size={12} />
+                              {formatDate(expense.expenseDate)}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Tag size={12} />
+                              {expense.category?.name || "Sem Categoria"}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="text-lg font-bold text-red-600">
-                      - {formatCurrency(expense.amount)}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                      <div className="text-lg font-bold text-red-600">
+                        - {formatCurrency(expense.amount)}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               {meta && meta.totalPages > 1 && (
                 <div className="flex items-center justify-center gap-4 mt-4">
                   <Button

@@ -1,8 +1,23 @@
 import { api } from "./api";
 
 export interface DashboardStats {
-    month: { totalExpense: number; count: number }
-    categoryBreakdown: { name: string; total: number; percentage: number }[];
+    month: {
+        totalExpense: number;
+        predictedTotal: number;
+        nextMonthTotal: number;
+        count: number;
+        daysRemaining: number;
+    }
+    categoryBreakdown: {
+        categoryId: string;
+        name: string;
+        total: number;
+        predictedTotal: number;
+        suggestedDailyLimit: number;
+        percentage: number;
+        budget: number;
+        budgetProgress: number
+    }[];
 }
 
 export interface MonthlyTrends {

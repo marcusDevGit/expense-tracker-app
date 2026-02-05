@@ -27,7 +27,7 @@ export class ExpenseController {
         return res.status(401).json({ error: "Usuário não autenticado" });
       }
 
-      const { walletId, month, year, page, limit } = req.query;
+      const { walletId, month, year, page, limit, categoryId } = req.query;
 
       if (!walletId || !month || !year) {
         return res.status(400).json({ error: "Parâmetros inválidos" });
@@ -40,6 +40,7 @@ export class ExpenseController {
         Number(year),
         page ? Number(page) : 1,
         limit ? Number(limit) : 20,
+        categoryId ? String(categoryId) : undefined,
       );
       return res.json(expenses);
     } catch (err: any) {

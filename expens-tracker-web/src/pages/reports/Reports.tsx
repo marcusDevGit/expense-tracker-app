@@ -151,9 +151,11 @@ export function Reports() {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fontSize: 12 }}
-                    tickFormatter={(v) => `R$${v}`}
+                    tickFormatter={(v: any) => `R$${v}`}
                   />
-                  <Tooltip formatter={(v: number) => formatCurrency(v)} />
+                  <Tooltip
+                    formatter={(v: any) => formatCurrency(Number(v) || 0)}
+                  />
                   <Line
                     type="monotone"
                     dataKey="total"
@@ -190,7 +192,9 @@ export function Reports() {
                       <Cell key={i} fill={COLORS[i % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(v: number) => formatCurrency(v)} />
+                  <Tooltip
+                    formatter={(v: any) => formatCurrency(Number(v) || 0)}
+                  />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>

@@ -4,7 +4,14 @@ import { statsService } from "@/services/stats.service";
 import { walletService } from "@/services/wallet.service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
-import { Wallet, TrendingDown, Receipt, PieChartIcon } from "lucide-react";
+import {
+  Wallet,
+  TrendingDown,
+  Receipt,
+  PieChartIcon,
+  AlertTriangle,
+  CalendarDays,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   PieChart,
@@ -79,14 +86,16 @@ export function Dashboard() {
           </select>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Saldo Atual</CardTitle>
               <Wallet className="h-4 w-4 text-emerald-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div
+                className={`text-2xl font-bold ${(currentWallet?.currentBalance || 0) < 0 ? "text-red-600" : "text-slate-900"}`}
+              >
                 {formatCurrency(currentWallet?.currentBalance || 0)}
               </div>
             </CardContent>
@@ -102,6 +111,22 @@ export function Dashboard() {
               <div className="text-2xl font-bold">
                 {formatCurrency(stats?.month.totalExpense || 0)}
               </div>
+              {stats?.month.daysRemaining && stats.month.daysRemaining > 0 ? (
+                <p className="text-[10px] text-blue-600 mt-1 font-medium">
+                  Faltam {stats.month.daysRemaining} dias para fechar o mês
+                </p>
+              ) : (
+                stats?.month.predictedTotal &&
+                stats.month.predictedTotal >
+                  (stats?.month.totalExpense || 0) && (
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Previsão:{" "}
+                    <span className="font-semibold text-slate-700">
+                      {formatCurrency(stats.month.predictedTotal)}
+                    </span>
+                  </p>
+                )
+              )}
             </CardContent>
           </Card>
           <Card>
@@ -115,7 +140,66 @@ export function Dashboard() {
               </div>
             </CardContent>
           </Card>
+          <Card className="bg-slate-50/50">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">Próximo Mês</CardTitle>
+              <CalendarDays className="h-4 w-4 text-orange-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-slate-700">
+                {formatCurrency(stats?.month.nextMonthTotal || 0)}
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Recorrentes e parcelas
+              </p>
+            </CardContent>
+          </Card>
         </div>
+
+        {/* Alertas de Orçamento */}
+        {stats?.categoryBreakdown.some(
+          (c) => c.budget > 0 && c.total > c.budget,
+        ) && (
+          <Card className="border-red-100 bg-red-50/30">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-bold flex items-center gap-2 text-red-600">
+                <AlertTriangle size={18} /> Atenção: Orçamentos Estourados
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+                {stats.categoryBreakdown
+                  .filter((c) => c.budget > 0 && c.total > c.budget)
+                  .map((c) => (
+                    <div
+                      key={c.name}
+                      className="flex flex-col p-3 rounded-lg bg-white border border-red-100 shadow-sm"
+                    >
+                      <div className="flex justify-between items-start mb-1">
+                        <span className="font-semibold text-slate-900">
+                          {c.name}
+                        </span>
+                        <span className="text-red-600 font-bold text-xs">
+                          +{formatCurrency(c.total - c.budget)}
+                        </span>
+                      </div>
+                      <div className="text-[10px] text-slate-500 mb-2">
+                        Limite: {formatCurrency(c.budget)} | Gasto:{" "}
+                        {formatCurrency(c.total)}
+                      </div>
+                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-red-500"
+                          style={{ width: "100%" }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Gráfico de Pizza */}
           <Card className="p-4 min-w-0">
@@ -142,7 +226,9 @@ export function Dashboard() {
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(v: number) => formatCurrency(v)} />
+                    <Tooltip
+                      formatter={(v: any) => formatCurrency(Number(v) || 0)}
+                    />
                     <Legend verticalAlign="bottom" height={36} />
                   </PieChart>
                 </ResponsiveContainer>
@@ -181,10 +267,10 @@ export function Dashboard() {
                       axisLine={false}
                       tickLine={false}
                       tick={{ fontSize: 12 }}
-                      tickFormatter={(v) => `R$${v}`}
+                      tickFormatter={(v: any) => `R$${v}`}
                     />
                     <Tooltip
-                      formatter={(v: number) => formatCurrency(v)}
+                      formatter={(v: any) => formatCurrency(Number(v) || 0)}
                       contentStyle={{
                         borderRadius: "8px",
                         border: "none",
@@ -226,8 +312,10 @@ export function Dashboard() {
                     <div className="font-bold text-slate-900">
                       {formatCurrency(cat.total)}
                     </div>
-                    <div className="text-xs text-slate-500">
-                      {cat.percentage}% do total
+                    <div className="text-[11px] text-blue-600 font-bold">
+                      {cat.suggestedDailyLimit > 0
+                        ? `${formatCurrency(cat.suggestedDailyLimit)}/dia`
+                        : "Sem saldo"}
                     </div>
                   </div>
                 </div>

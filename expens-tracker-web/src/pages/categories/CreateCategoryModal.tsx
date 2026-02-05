@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { categoryService } from "@/services/category.service";
+import { categoryService, type Category } from "@/services/category.service";
 import { Button } from "@/components/ui/button";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
@@ -10,10 +10,12 @@ import { X, Loader2 } from "lucide-react";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  category?: Category | null;
 }
 
 export function CreateCategoryModal({ isOpen, onClose, category }: Props) {
   const [name, setName] = useState("");
+  const [budget, setBudget] = useState("");
   const [color, setColor] = useState("#6366f1");
   const [icon, setIcon] = useState("🏷️");
   const queryClient = useQueryClient();
@@ -66,20 +68,33 @@ export function CreateCategoryModal({ isOpen, onClose, category }: Props) {
   useEffect(() => {
     if (category) {
       setName(category.name);
+      setBudget(category.budget ? String(category.budget) : "");
       setColor(category.color || "#6366f1");
       setIcon(category.icon || "🏷️");
     } else {
       setName("");
+      setBudget("");
       setColor("#6366f1");
       setIcon("🏷️");
     }
   }, [category, isOpen]);
 
   const mutation = useMutation({
-    mutationFn: (data: { name: string; color?: string; icon?: string }) =>
+    mutationFn: (data: {
+      name: string;
+      color?: string;
+      icon?: string;
+      budget?: number;
+    }) =>
       category
-        ? categoryService.update(category.id, data.name, data.color, data.icon)
-        : categoryService.create(data.name, data.color, data.icon),
+        ? categoryService.update(
+            category.id,
+            data.name,
+            data.color,
+            data.icon,
+            data.budget,
+          )
+        : categoryService.create(data.name, data.color, data.icon, data.budget),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast({ title: "Sucesso!", description: "Categoria criada com sucesso" });
@@ -102,7 +117,7 @@ export function CreateCategoryModal({ isOpen, onClose, category }: Props) {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            mutation.mutate({ name, color, icon });
+            mutation.mutate({ name, color, icon, budget: Number(budget) });
           }}
           className="space-y-4"
         >
@@ -115,6 +130,16 @@ export function CreateCategoryModal({ isOpen, onClose, category }: Props) {
               onChange={(e) => setName(e.target.value)}
               required
               autoFocus
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="category-budget">Orçamento Mensal (R$)</Label>
+            <Input
+              id="category-budget"
+              type="number"
+              placeholder="Ex: 500.00"
+              value={budget}
+              onChange={(e) => setBudget(e.target.value)}
             />
           </div>
           <div className="space-y-3">

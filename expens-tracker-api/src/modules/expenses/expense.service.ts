@@ -39,6 +39,7 @@ export class ExpenseService {
     year: number,
     page: number = 1,
     limit: number = 20,
+    categoryId?: string,
   ) {
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0, 23, 59, 59);
@@ -46,15 +47,21 @@ export class ExpenseService {
 
     const skip = (page - 1) * limit;
 
+    const where: Prisma.ExpenseWhereInput = {
+      walletId,
+      expenseDate: {
+        gte: startDate,
+        lte: endDate,
+      },
+    };
+
+    if (categoryId) {
+      where.categoryId = categoryId;
+    }
+
     const [expenses, total] = await Promise.all([
       prisma.expense.findMany({
-        where: {
-          walletId,
-          expenseDate: {
-            gte: startDate,
-            lte: endDate,
-          },
-        },
+        where,
         include: {
           category: true,
         },
@@ -62,7 +69,7 @@ export class ExpenseService {
         skip,
         take: limit,
       }),
-      prisma.expense.count({ where: { walletId, expenseDate: { gte: startDate, lte: endDate }, }, }),
+      prisma.expense.count({ where }),
     ]);
     return { data: expenses, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } }
   }
@@ -115,7 +122,13 @@ export class ExpenseService {
   private async getOrCreateCategory(userId: string, categoryId?: string, newCategoryName?: string) {
     if (newCategoryName) {
       const newCategory = await prisma.category.create({
-        data: { id: crypto.randomUUID(), name: newCategoryName, userId },
+        data: {
+          id: crypto.randomUUID(),
+          name: newCategoryName,
+          userId,
+          color: "#000000",
+          icon: "📁"
+        },
       });
       return newCategory.id;
     }

@@ -2,12 +2,36 @@ import { prisma } from "../src/config/database.js";
 import { randomUUID } from "node:crypto";
 
 const GLOBAL_CATEGORIES = [
-    { name: "🍔 Alimentação", icon: "burger", color: "#FF6B6B" },
-    { name: "🚗 Transporte", icon: "car", color: "#4ECDC4" },
-    { name: "🏠 Moradia", icon: "home", color: "#45B7D1" },
-    { name: "🎮 Lazer", icon: "gamepad", color: "#96CEB4" },
-    { name: "💊 Saúde", icon: "pill", color: "#FFEAA7" },
-    { name: "📚 Educação", icon: "book", color: "#DDA15E" },
+    {
+        name: "Alimentação",
+        icon: "🍔",
+        color: "#FF6B6B",
+    },
+    {
+        name: "Transporte",
+        icon: "🚗",
+        color: "#4ECDC4",
+    },
+    {
+        name: "Moradia",
+        icon: "🏠",
+        color: "#45B7D1",
+    },
+    {
+        name: "Lazer",
+        icon: "🎮",
+        color: "#96CEB4",
+    },
+    {
+        name: "Saúde",
+        icon: "💊",
+        color: "#FFEAA7",
+    },
+    {
+        name: "Educação",
+        icon: "📚",
+        color: "#DDA15E",
+    },
 ];
 
 async function main() {

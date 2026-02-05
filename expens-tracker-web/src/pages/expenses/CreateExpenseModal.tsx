@@ -8,7 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, AlertTriangle } from "lucide-react";
+import { statsService } from "@/services/stats.service";
+import { formatCurrency } from "@/lib/utils";
 
 interface Props {
   isOpen: boolean;
@@ -49,6 +51,34 @@ export function CreateExpenseModal({ isOpen, onClose }: Props) {
       setWalletId(wallets[0].id);
     }
   }, [wallets, walletId]);
+
+  const selectedDate = new Date(expenseDate);
+  const { data: stats } = useQuery({
+    queryKey: [
+      "stats",
+      "dashboard",
+      walletId,
+      selectedDate.getMonth() + 1,
+      selectedDate.getFullYear(),
+    ],
+    queryFn: () =>
+      statsService.getDashboardStats(
+        walletId,
+        selectedDate.getMonth() + 1,
+        selectedDate.getFullYear(),
+      ),
+    enabled: !!walletId && !!categoryId && categoryId !== "NEW",
+  });
+
+  const selectedCategory = categories?.find((c) => c.id === categoryId);
+  const categoryStats = stats?.categoryBreakdown.find(
+    (s) => s.categoryId === categoryId,
+  );
+
+  const currentSpent = categoryStats?.total || 0;
+  const budget = selectedCategory?.budget || 0;
+  const newTotal = currentSpent + Number(amount || 0);
+  const isOverBudget = budget > 0 && newTotal > budget;
 
   const mutation = useMutation({
     mutationFn: expenseService.create,
@@ -107,6 +137,15 @@ export function CreateExpenseModal({ isOpen, onClose }: Props) {
                 onChange={(e) => setAmount(e.target.value)}
                 required
               />
+              {isOverBudget && (
+                <div className="flex items-center gap-1.5 mt-1 text-amber-600 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <AlertTriangle size={14} />
+                  <span className="text-[11px] font-medium leading-tight">
+                    Esta despesa fará você exceder o orçamento de{" "}
+                    {formatCurrency(budget)} para esta categoria.
+                  </span>
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label>Data</Label>
@@ -170,7 +209,7 @@ export function CreateExpenseModal({ isOpen, onClose }: Props) {
             <Checkbox
               id="recurring"
               checked={isRecurring}
-              onCheckedChange={setIsRecurring}
+              onCheckedChange={(checked) => setIsRecurring(checked === true)}
               className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
             />
             <Label htmlFor="recurring">Recorrente</Label>

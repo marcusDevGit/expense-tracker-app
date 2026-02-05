@@ -2,7 +2,7 @@ import { prisma } from "../../config/database.js";
 import { randomUUID } from "crypto";
 
 export class CategoryService {
-  async create(userId: string, name: string, color?: string, icon?: string) {
+  async create(userId: string, name: string, color?: string, icon?: string, budget?: number) {
     const existingCategory = await prisma.category.findFirst({
       where: {
         name,
@@ -18,6 +18,7 @@ export class CategoryService {
         name,
         color,
         icon,
+        budget,
         userId,
       },
     });
@@ -34,7 +35,7 @@ export class CategoryService {
     const category = await prisma.category.findFirst({
       where: {
         id: categoryId,
-        userId,
+        OR: [{ userId }, { userId: null }],
       },
     });
     if (!category) {
@@ -43,7 +44,7 @@ export class CategoryService {
     return category;
   }
 
-  async update(userId: string, categoryId: string, name: string, color?: string, icon?: string) {
+  async update(userId: string, categoryId: string, name: string, color?: string, icon?: string, budget?: number) {
     await this.findById(userId, categoryId);
     return prisma.category.update({
       where: {
@@ -53,6 +54,7 @@ export class CategoryService {
         name,
         color,
         icon,
+        budget,
       },
     });
   }
