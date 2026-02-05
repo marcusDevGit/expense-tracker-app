@@ -44,8 +44,9 @@ model Category {
   name      String
   color     String?
   icon      String?
-  userId    String
-  user      User      @relation(fields: [userId], references: [id])
+  budget    Decimal?  @default(0)
+  userId    String?
+  user      User?      @relation(fields: [userId], references: [id])
   expenses  Expense[]
   createdAt DateTime  @default(now())
 
@@ -58,11 +59,14 @@ model Expense {
   amount          Decimal
   expenseDate     DateTime
   isRecurring     Boolean         @default(false)
-  recurrencetType RecurrenceType?
+  recurrenceType  RecurrenceType?
+  paymentMethod   PaymentMethod @default(CASH)
+  installments    Int?            @default(1)
+  currentInstallment Int?           @default(1)
   walletId        String
-  categoryId      String
+  categoryId      String?
   wallet          Wallet          @relation(fields: [walletId], references: [id])
-  category        Category        @relation(fields: [categoryId], references: [id])
+  category        Category?       @relation(fields: [categoryId], references: [id])
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
@@ -96,4 +100,13 @@ model PasswordResetToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([tokenHash])
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  PIX
+  CASH
+  BANK_TRANSFER
+  OTHER
 }

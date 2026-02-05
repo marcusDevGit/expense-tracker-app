@@ -12,6 +12,10 @@ router.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
+router.get("/ping", (req, res) => {
+  res.json({ status: "pong", time: new Date().toISOString() });
+});
+
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/wallets", walletRoutes);

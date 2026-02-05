@@ -1,6 +1,6 @@
 {
   "name": "expens-tracker-api",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "type": "module",
   "author": "Marcus Phellypp",
   "scripts": {
@@ -10,6 +10,8 @@
     "migrate": "prisma migrate dev",
     "generate": "prisma generate",
     "studio": "prisma studio",
+    "prisma:status": "prisma migrate status",
+    "prisma:migrate:diff": "prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma",
     "test": "jest",
     "db": "docker start expense-tracker-postgres",
     "seed": "tsx prisma/seed.ts",

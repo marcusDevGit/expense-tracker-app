@@ -1,121 +1,165 @@
 import { prisma } from "../../config/database.js";
-import { Prisma } from "@prisma/client";
+import { ExpenseService } from "../expenses/expense.service.js";
+
+const expenseService = new ExpenseService();
 
 export class StatsService {
-  async getDashboardStats(
-    userId: string,
-    walletId: string,
-    month: number,
-    year: number,
-  ) {
-    // 1. Validar carteira
-    const wallet = await prisma.wallet.findFirst({
-      where: { id: walletId, userId },
-    });
-    if (!wallet) throw new Error("Carteira não encontrada");
+    async getDashboardData(userId: string, walletId: string, month: number, year: number) {
+        await expenseService.processRecurring(userId);
 
-    // Datas para filtro do mês atual
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0, 23, 59, 59);
+        const startDate = new Date(year, month - 1, 1);
+        const endDate = new Date(year, month, 0, 23, 59, 59);
 
-    // 2. Buscar despesas do mês
-    const expenses = await prisma.expense.findMany({
-      where: {
-        walletId,
-        expenseDate: {
-          gte: startDate,
-          lte: endDate,
-        },
-      },
-      include: { category: true },
-    });
+        const expenses = await prisma.expense.findMany({
+            where: {
+                walletId,
+                expenseDate: { gte: startDate, lte: endDate }
+            },
+            include: { category: true }
+        });
 
-    // 3. Calcular totais do mês
-    const totalExpense = expenses.reduce(
-      (acc, curr) => acc.add(curr.amount),
-      new Prisma.Decimal(0),
-    );
+        console.log(`Found ${expenses.length} expenses for stats`);
+        if (expenses.length > 0) {
+            console.log("First expense category:", expenses[0].category);
+        }
 
-    // 4. Agrupar por categoria
-    const categoryMap = new Map<
-      string,
-      { name: string; total: number; color: string | null }
-    >();
+        const now = new Date();
+        const isCurrentMonth = now.getMonth() + 1 === month && now.getFullYear() === year;
+        const daysInMonth = new Date(year, month, 0).getDate();
+        const currentDay = isCurrentMonth ? now.getDate() : daysInMonth;
+        const daysRemaining = isCurrentMonth ? (daysInMonth - currentDay + 1) : 0;
 
-    expenses.forEach((expense) => {
-      const current = categoryMap.get(expense.categoryId) || {
-        name: expense.category.name,
-        total: 0,
-        color: expense.category.color,
-      };
+        const totalExpense = expenses.reduce((acc, curr) => acc + Number(curr.amount), 0);
+        const predictedTotal = (totalExpense / currentDay) * daysInMonth;
 
-      categoryMap.set(expense.categoryId, {
-        ...current,
-        total: current.total + Number(expense.amount),
-      });
-    });
+        const categoryMap: Record<string, { id: string, name: string, total: number, budget: number }> = {};
 
-    const categoryBreakdown = Array.from(categoryMap.values())
-      .map((cat) => ({
-        ...cat,
-        percentage:
-          Number(totalExpense) > 0
-            ? Math.round((cat.total / Number(totalExpense)) * 100)
-            : 0,
-      }))
-      .sort((a, b) => b.total - a.total);
+        expenses.forEach(exp => {
+            const catId = exp.categoryId || "none";
+            const catName = exp.category?.name || "Sem Categoria";
+            const budget = Number(exp.category?.budget) || 0;
 
-    // 5. Histórico mensal (últimos 6 meses)
-    const historyStart = new Date(year, month - 6, 1); // Pega 6 meses atrás
-    const historyEnd = new Date(year, month + 1, 0); // Até o fim do mês atual
+            if (!categoryMap[catId]) {
+                categoryMap[catId] = { id: catId, name: catName, total: 0, budget };
+            }
+            categoryMap[catId].total += Number(exp.amount);
+        });
 
-    const historyExpenses = await prisma.expense.groupBy({
-      by: ["expenseDate"],
-      where: {
-        walletId,
-        expenseDate: {
-          gte: historyStart,
-          lte: historyEnd,
-        },
-      },
-      _sum: {
-        amount: true,
-      },
-    });
+        const categoryBreakdown = Object.values(categoryMap).map(cat => {
+            const remaining = cat.budget - cat.total;
+            const suggestedDailyLimit = daysRemaining > 0 && remaining > 0 ? (remaining / daysRemaining) : 0;
 
-    // Processar histórico agrupando por mês/ano em JS (Prisma não agrupa por mês nativamente sem raw)
-    const monthlyHistoryMap = new Map<string, number>();
+            return {
+                ...cat,
+                categoryId: cat.id,
+                predictedTotal: Math.round(((cat.total / currentDay) * daysInMonth) * 100) / 100,
+                suggestedDailyLimit: Math.round(suggestedDailyLimit * 100) / 100,
+                percentage: totalExpense > 0 ? Math.round((cat.total / totalExpense) * 100) : 0,
+                budgetProgress: cat.budget > 0 ? Math.round((cat.total / cat.budget) * 100) : 0
+            }
+        });
 
-    // Inicializar últimos 6 meses com zero
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(year, month - 1 - i, 1);
-      const key = `${d.getMonth() + 1}/${d.getFullYear()}`;
-      monthlyHistoryMap.set(key, 0);
+        const nextMonthStart = new Date(year, month, 1);
+        const nextMonthEnd = new Date(year, month + 1, 0, 23, 59, 59);
+
+        const nextMonthExpenses = await prisma.expense.findMany({
+            where: {
+                walletId,
+                expenseDate: { gte: nextMonthStart, lte: nextMonthEnd }
+            }
+        });
+
+        const recurringTemplates = await prisma.expense.findMany({
+            where: { walletId, isRecurring: true }
+        });
+
+        let nextMonthTotal = nextMonthExpenses.reduce((acc, curr) => acc + Number(curr.amount), 0);
+        recurringTemplates.forEach(template => {
+            if (template.recurrenceType === 'MONTHLY') {
+                nextMonthTotal += Number(template.amount);
+            } else if (template.recurrenceType === 'WEEKLY') {
+                nextMonthTotal += Number(template.amount) * 4;
+            } else if (template.recurrenceType === 'YEARLY' && new Date(template.expenseDate).getMonth() === nextMonthStart.getMonth()) {
+                nextMonthTotal += Number(template.amount);
+            }
+        });
+
+        console.log("Stats generated successfully", { totalExpense, predictedTotal, nextMonthTotal, breakdownCount: categoryBreakdown.length });
+
+        return {
+            month: {
+                totalExpense,
+                predictedTotal: Math.round(predictedTotal * 100) / 100,
+                nextMonthTotal: Math.round(nextMonthTotal * 100) / 100,
+                count: expenses.length,
+                daysRemaining
+            },
+            categoryBreakdown
+        };
     }
 
-    historyExpenses.forEach((item) => {
-      const d = new Date(item.expenseDate);
-      const key = `${d.getMonth() + 1}/${d.getFullYear()}`;
-      if (monthlyHistoryMap.has(key)) {
-        const current = monthlyHistoryMap.get(key) || 0;
-        monthlyHistoryMap.set(key, current + Number(item._sum.amount || 0));
-      }
-    });
+    async getMonthlyTrends(userId: string, walletId: string, limit: number = 6) {
+        const now = new Date()
+        const startDate = new Date(now.getFullYear(), now.getMonth() - limit + 1, 1)
 
-    const monthlyHistory = Array.from(monthlyHistoryMap.entries()).map(
-      ([month, total]) => ({
-        month,
-        total,
-      }),
-    );
+        const expenses = await prisma.expense.findMany({
+            where: { walletId, expenseDate: { gte: startDate, lte: now } },
+            select: { amount: true, expenseDate: true }
+        });
 
-    return {
-      month: {
-        totalExpense: Number(totalExpense),
-        count: expenses.length,
-      },
-      categoryBreakdown,
-      monthlyHistory,
+        const trendsMap: Record<string, { month: string; year: number; total: number; sortKey: number }> = {};
+
+        for (let i = 0; i < limit; i++) {
+            const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const monthLabel = date.toLocaleDateString('pt-BR', { month: "short" });
+            const year = date.getFullYear()
+            const key = `${year}-${date.getMonth()}`
+
+            trendsMap[key] = {
+                month: monthLabel,
+                year,
+                total: 0,
+                sortKey: date.getTime()
+            };
+        }
+        expenses.forEach(exp => {
+            const date = new Date(exp.expenseDate);
+            const key = `${date.getFullYear()}-${date.getMonth()}`;
+            if (trendsMap[key]) {
+                trendsMap[key].total += Number(exp.amount)
+            }
+        });
+
+        return Object.values(trendsMap)
+            .sort((a, b) => a.sortKey - b.sortKey)
+            .map(({ month, year, total }) => ({ month, year, total }))
+    }
+
+    async getComparisonData(userId: string, walletId: string, month: number, year: number) {
+        const currentStart = new Date(year, month - 1, 1);
+        const currentEnd = new Date(year, month, 0, 23, 59, 59,)
+
+        const prevDate = new Date(year, month - 2, 1);
+        const prevMonth = prevDate.getMonth() + 1;
+        const prevYear = prevDate.getFullYear();
+        const prevStart = new Date(prevYear, prevMonth - 1, 1);
+        const prevEnd = new Date(prevYear, prevMonth, 0, 23, 59, 59);
+
+        const [current, prev] = await Promise.all([
+            prisma.expense.aggregate({ where: { walletId, expenseDate: { gte: currentStart, lte: currentEnd } }, _sum: { amount: true } }),
+            prisma.expense.aggregate({ where: { walletId, expenseDate: { gte: prevStart, lte: prevEnd } }, _sum: { amount: true } }),
+
+        ]);
+        const currentTotal = Number(current._sum.amount) || 0;
+        const prevTotal = Number(prev._sum.amount) || 0;
+        const percentageChange = prevTotal > 0 ? ((currentTotal - prevTotal) / prevTotal) * 100 : (currentTotal > 0 ? 100 : 0)
+
+        return {
+            currentMonth: { total: currentTotal, month, year },
+            prevMonth: { total: prevTotal, month: prevMonth, year: prevYear },
+            percentageChange: Math.round(percentageChange)
+        }
+
     };
-  }
+
 }
