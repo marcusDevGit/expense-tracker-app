@@ -3,6 +3,9 @@ node_modules
 .env
 .env.example
 .env.docker
+.env.production
+.env.development
+.env.test
 backup.sql
 
 /generated/prisma

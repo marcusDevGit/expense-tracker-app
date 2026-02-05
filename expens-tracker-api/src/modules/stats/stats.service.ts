@@ -50,29 +50,40 @@ export class StatsService {
     }
 
     async getMonthlyTrends(userId: string, walletId: string, limit: number = 6) {
-        const trends = []
         const now = new Date()
+        const startDate = new Date(now.getFullYear(), now.getMonth() - limit + 1, 1)
+
+        const expenses = await prisma.expense.findMany({
+            where: { walletId, expenseDate: { gte: startDate, lte: now } },
+            select: { amount: true, expenseDate: true }
+        });
+
+        const trendsMap: Record<string, { month: string; year: number; total: number; sortKey: number }> = {};
 
         for (let i = 0; i < limit; i++) {
             const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-            const month = date.getMonth() + 1;
+            const monthLabel = date.toLocaleDateString('pt-BR', { month: "short" });
             const year = date.getFullYear()
+            const key = `${year}-${date.getMonth()}`
 
-            const startDate = new Date(year, month - 1, 1)
-            const endDate = new Date(year, month, 0, 23, 59, 59)
-            const expensesAggregation = await prisma.expense.aggregate({
-                where: {
-                    walletId, expenseDate: { gte: startDate, lte: endDate }
-                },
-                _sum: { amount: true }
-            })
-            trends.push({
-                month: date.toLocaleDateString('pt-BR', { month: "short" }),
+            trendsMap[key] = {
+                month: monthLabel,
                 year,
-                total: Number(expensesAggregation._sum.amount) || 0
-            })
+                total: 0,
+                sortKey: date.getTime()
+            };
         }
-        return trends
+        expenses.forEach(exp => {
+            const date = new Date(exp.expenseDate);
+            const key = `${date.getFullYear()}-${date.getMonth()}`;
+            if (trendsMap[key]) {
+                trendsMap[key].total += Number(exp.amount)
+            }
+        });
+
+        return Object.values(trendsMap)
+            .sort((a, b) => a.sortKey - b.sortKey)
+            .map(({ month, year, total }) => ({ month, year, total }))
     }
 
     async getComparisonData(userId: string, walletId: string, month: number, year: number) {

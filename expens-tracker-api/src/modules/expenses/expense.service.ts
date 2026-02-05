@@ -5,70 +5,16 @@ import crypto from "crypto";
 export class ExpenseService {
   async create(
     userId: string,
-    data: {
-      description: string;
-      amount: number;
-      expenseDate: string;
-      walletId: string;
-      categoryId?: string;
-      newCategoryName?: string;
-      isRecurring: boolean;
-      recurrenceType?: "WEEKLY" | "MONTHLY" | "YEARLY";
-      paymentMethod?: "CREDIT_CARD" | "DEBIT_CARD" | "PIX" | "CASH" | "BANK_TRANSFER" | "OTHER";
-      installments?: number
-    },
-  ) {
+    data: any) {
     const wallet = await prisma.wallet.findFirst({
-      where: {
-        id: data.walletId,
-        userId,
-      },
+      where: { id: data.walletId, userId },
     });
-    if (!wallet) throw new Error("carteira invalida");
+    if (!wallet) throw new Error("carteira invalida")
 
-    if (data.categoryId) {
-      const category = await prisma.category.findFirst({
-        where: { id: data.categoryId, userId },
-      });
-      if (!category) throw new Error("categoria invalida");
-    }
+    const categoryId = await this.getOrCreateCategory(userId, data.categoryId, data.newCategoryName);
+    const installmentsCount = data.installments || 1;
 
-    let categoryId = data.categoryId;
-    if (data.newCategoryName) {
-      const newCategory = await prisma.category.create({
-        data: {
-          id: crypto.randomUUID(),
-          name: data.newCategoryName,
-          userId,
-        },
-      });
-      categoryId = newCategory.id;
-    }
-
-    const installmentsCount = data.installments || 1
-    let firstExpense;
-
-    for (let i = 0; i < installmentsCount; i++) {
-      const date = new Date(data.expenseDate)
-      date.setMonth(date.getMonth() + i);
-
-      const expense = await prisma.expense.create({
-        data: {
-          description: installmentsCount > 1 ? `${data.description} (${i + 1}/${installmentsCount})` : data.description,
-          amount: new Prisma.Decimal(data.amount),
-          expenseDate: date,
-          isRecurring: data.isRecurring ?? false,
-          recurrenceType: data.recurrenceType,
-          paymentMethod: data.paymentMethod || "CASH",
-          installments: installmentsCount,
-          currentInstallment: i + 1,
-          walletId: data.walletId,
-          categoryId: categoryId || null,
-        },
-      });
-      if (i === 0) firstExpense = expense
-    }
-    return firstExpense
+    return this.createInstallments({ ...data, categoryId, installmentsCount });
   }
 
   async processRecurring(userId: string) {
@@ -82,52 +28,7 @@ export class ExpenseService {
     });
 
     for (const template of recurringTemplates) {
-      if (!template.recurrenceType) continue;
-
-      const incrementDate = (date: Date) => {
-        const d = new Date(date);
-        if (template.recurrenceType === "WEEKLY") d.setDate(d.getDate() + 7);
-        else if (template.recurrenceType === "MONTHLY") d.setMonth(d.getMonth() + 1);
-        else if (template.recurrenceType === "YEARLY") d.setFullYear(d.getFullYear() + 1);
-        else return null;
-        return d;
-      };
-
-      let currentDate = incrementDate(new Date(template.expenseDate));
-      if (!currentDate) continue;
-
-      while (currentDate <= today) {
-        const startOfDay = new Date(currentDate);
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date(currentDate);
-        endOfDay.setHours(23, 59, 59, 999);
-
-        const existing = await prisma.expense.findFirst({
-          where: {
-            description: template.description,
-            walletId: template.walletId,
-            expenseDate: {
-              gte: startOfDay,
-              lte: endOfDay,
-            },
-          },
-        });
-
-        if (!existing) {
-          await this.create(userId, {
-            description: template.description,
-            amount: Number(template.amount),
-            expenseDate: currentDate.toISOString(),
-            walletId: template.walletId,
-            categoryId: template.categoryId,
-            isRecurring: false,
-          });
-        }
-
-        const nextPotential = incrementDate(currentDate);
-        if (!nextPotential || nextPotential <= currentDate) break;
-        currentDate = nextPotential;
-      }
+      await this.processTemplate(userId, template, today)
     }
   }
 
@@ -136,26 +37,34 @@ export class ExpenseService {
     walletId: string,
     month: number,
     year: number,
+    page: number = 1,
+    limit: number = 20,
   ) {
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0, 23, 59, 59);
     await this.processRecurring(userId);
 
-    return prisma.expense.findMany({
-      where: {
-        walletId,
-        expenseDate: {
-          gte: startDate,
-          lte: endDate,
+    const skip = (page - 1) * limit;
+
+    const [expenses, total] = await Promise.all([
+      prisma.expense.findMany({
+        where: {
+          walletId,
+          expenseDate: {
+            gte: startDate,
+            lte: endDate,
+          },
         },
-      },
-      include: {
-        category: true,
-      },
-      orderBy: {
-        expenseDate: "desc",
-      },
-    });
+        include: {
+          category: true,
+        },
+        orderBy: { expenseDate: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.expense.count({ where: { walletId, expenseDate: { gte: startDate, lte: endDate }, }, }),
+    ]);
+    return { data: expenses, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } }
   }
   async findById(userId: string, expenseId: string) {
     const expense = await prisma.expense.findFirst({
@@ -201,5 +110,82 @@ export class ExpenseService {
     return prisma.expense.delete({
       where: { id: expenseId },
     });
+  }
+
+  private async getOrCreateCategory(userId: string, categoryId?: string, newCategoryName?: string) {
+    if (newCategoryName) {
+      const newCategory = await prisma.category.create({
+        data: { id: crypto.randomUUID(), name: newCategoryName, userId },
+      });
+      return newCategory.id;
+    }
+    if (categoryId) {
+      const category = await prisma.category.findFirst({
+        where: { id: categoryId, OR: [{ userId }, { userId: null }] },
+      });
+      if (!category) throw new Error("categoria invalida");
+      return categoryId;
+    }
+    return null;
+  }
+
+  private async createInstallments(data: any) {
+    const { installmentsCount, description, amount, expenseDate, isRecurring, recurrenceType, paymentMethod, walletId, categoryId } = data;
+    let firstExpense;
+    for (let i = 0; i < installmentsCount; i++) {
+      const date = new Date(expenseDate);
+      date.setMonth(date.getMonth() + i);
+      const expense = await prisma.expense.create({
+        data: {
+          description: installmentsCount > 1 ? `${description} (${i + 1}/${installmentsCount})` : description,
+          amount: new Prisma.Decimal(amount),
+          expenseDate: date,
+          isRecurring: isRecurring ?? false,
+          recurrenceType,
+          paymentMethod: paymentMethod || "CASH",
+          installments: installmentsCount,
+          currentInstallment: i + 1,
+          walletId,
+          categoryId,
+        },
+      });
+      if (i === 0) firstExpense = expense;
+    }
+    return firstExpense;
+  }
+
+  private async processTemplate(userId: string, template: any, today: Date) {
+    if (!template.recurrenceType) return;
+    let currentDate = this.calculateNextDate(new Date(template.expenseDate), template.recurrenceType);
+    if (!currentDate) return;
+
+    while (currentDate <= today) {
+      const startOfDay = new Date(currentDate); startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(currentDate); endOfDay.setHours(23, 59, 59, 999);
+
+      const existing = await prisma.expense.findFirst({
+        where: { description: template.description, walletId: template.walletId, expenseDate: { gte: startOfDay, lte: endOfDay } },
+      });
+
+      if (!existing) {
+        await this.create(userId, {
+          description: template.description, amount: Number(template.amount),
+          expenseDate: currentDate.toISOString(), walletId: template.walletId,
+          categoryId: template.categoryId, isRecurring: false,
+        });
+      }
+      const nextPotential = this.calculateNextDate(currentDate, template.recurrenceType);
+      if (!nextPotential || nextPotential <= currentDate) break;
+      currentDate = nextPotential;
+    }
+  }
+
+  private calculateNextDate(date: Date, type: string) {
+    const d = new Date(date);
+    if (type === "WEEKLY") d.setDate(d.getDate() + 7);
+    else if (type === "MONTHLY") d.setMonth(d.getMonth() + 1);
+    else if (type === "YEARLY") d.setFullYear(d.getFullYear() + 1);
+    else return null;
+    return d;
   }
 }

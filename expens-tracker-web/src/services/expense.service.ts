@@ -12,10 +12,19 @@ export interface Expense {
     isRecurring?: boolean
     recurrenceType?: "WEEKLY" | "MONTHLY" | "YEARLY"
 }
+export interface PaginatedResponse<T> {
+    data: T[]
+    meta: {
+        total: number
+        page: number
+        limit: number
+        totalPages: number
+    }
+}
 
 export const expenseService = {
-    async list(params?: { walletId?: string; month?: number; year?: number }) {
-        const response = await api.get<Expense[]>("/expenses", { params })
+    async list(params?: { walletId?: string; month?: number; year?: number; page?: number; limit?: number }) {
+        const response = await api.get<PaginatedResponse<Expense>>("/expenses", { params })
         return response.data
     },
 

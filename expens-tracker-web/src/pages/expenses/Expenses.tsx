@@ -27,6 +27,7 @@ export function Expenses() {
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [year, setYear] = useState(now.getFullYear());
   const [selectedWalletId, setSelectedWalletId] = useState<string>("");
+  const [page, setPage] = useState(1);
 
   const { data: wallets } = useQuery({
     queryKey: ["wallets"],
@@ -56,16 +57,21 @@ export function Expenses() {
     },
   });
 
-  const { data: expenses, isLoading } = useQuery({
-    queryKey: ["expenses", selectedWalletId, month, year],
+  const { data: expensesResponse, isLoading } = useQuery({
+    queryKey: ["expenses", selectedWalletId, month, year, page],
     queryFn: () =>
       expenseService.list({
         walletId: selectedWalletId!,
         month,
         year,
+        page,
+        limit: 10,
       }),
     enabled: !!selectedWalletId,
   });
+
+  const expenses = expensesResponse?.data;
+  const meta = expensesResponse?.meta;
 
   const months = [
     "Janeiro",
@@ -151,38 +157,63 @@ export function Expenses() {
               Nenhuma despesa encontrada.
             </div>
           ) : (
-            expenses?.map((expense) => (
-              <Card
-                key={expense.id}
-                className="overflow-hidden border-slate-200"
-              >
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-red-50 p-2 rounded-lg text-red-600">
-                      <Receipt size={20} />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-slate-900">
-                        {expense.description}
-                      </p>
-                      <div className="flex gap-3 text-xs text-slate-500 mt-1">
-                        <span className="flex items-center gap-1">
-                          <CalendarIcon size={12} />{" "}
-                          {formatDate(expense.expenseDate)}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Tag size={12} />
-                          {expense.category?.name || "Sem Categoria"}
-                        </span>
+            <>
+              {expenses?.map((expense) => (
+                <Card
+                  key={expense.id}
+                  className="overflow-hidden border-slate-200"
+                >
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="bg-red-50 p-2 rounded-lg text-red-600">
+                        <Receipt size={20} />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-900">
+                          {expense.description}
+                        </p>
+                        <div className="flex gap-3 text-xs text-slate-500 mt-1">
+                          <span className="flex items-center gap-1">
+                            <CalendarIcon size={12} />
+                            {formatDate(expense.expenseDate)}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Tag size={12} />
+                            {expense.category?.name || "Sem Categoria"}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="text-lg font-bold text-red-600">
-                    - {formatCurrency(expense.amount)}
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                    <div className="text-lg font-bold text-red-600">
+                      - {formatCurrency(expense.amount)}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              {meta && meta.totalPages > 1 && (
+                <div className="flex items-center justify-center gap-4 mt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                  >
+                    Anterior
+                  </Button>
+                  <span className="text-sm text-slate-600">
+                    Página {page} de {meta.totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    onClick={() =>
+                      setPage((p) => Math.min(meta.totalPages, p + 1))
+                    }
+                    disabled={page === meta.totalPages}
+                  >
+                    Próxima
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { expenseService } from "@/services/expense.service";
 import { walletService } from "@/services/wallet.service";
@@ -43,6 +43,12 @@ export function CreateExpenseModal({ isOpen, onClose }: Props) {
     queryKey: ["categories"],
     queryFn: categoryService.list,
   });
+
+  useEffect(() => {
+    if (wallets && wallets.length > 0 && !walletId) {
+      setWalletId(wallets[0].id);
+    }
+  }, [wallets, walletId]);
 
   const mutation = useMutation({
     mutationFn: expenseService.create,
