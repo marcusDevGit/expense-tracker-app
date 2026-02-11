@@ -44,7 +44,7 @@ export function CreateWalletModal({ isOpen, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md bg-white rounded-xl p-6 shadow-xl animate-in zoom-in duration-200">
+      <div className="w-full max-w-md bg-card rounded-xl p-6 shadow-xl animate-in zoom-in duration-200">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Nova Carteira</h2>
           <Button variant="ghost" onClick={onClose}>

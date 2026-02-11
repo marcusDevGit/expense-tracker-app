@@ -6,7 +6,7 @@ export function Header() {
   const { user, logout } = useAuthStore();
 
   return (
-    <header className="h-16 border-b bg-white flex items-center justify-between px-6">
+    <header className="h-16 border-b bg-card flex items-center justify-between px-6">
       <h2 className="text-lg font-semibold text-slate-700">Minhas Finanças</h2>
 
       <div className="flex items-center gap-4">
@@ -15,10 +15,10 @@ export function Header() {
             <p className="text-sm font-medium leading-none">
               Olá, {user?.name}
             </p>
-            <p className="text-xs text-slate-500">{user?.email}</p>
+            <p className="text-xs text-muted-foreground">{user?.email}</p>
           </div>
-          <div className="h-8 w-8 rounded-full bg-slate-100 flex items-center justify-center">
-            <UserIcon size={16} className="text-slate-600" />
+          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+            <UserIcon size={16} className="text-muted-foreground" />
           </div>
         </div>
 

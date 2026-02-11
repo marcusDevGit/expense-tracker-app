@@ -46,8 +46,8 @@ export function Register() {
   };
 
   return (
-    <div className="flex bg-slate-50 min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg border-slate-200">
+    <div className="flex bg-muted min-h-screen items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-lg border-border">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
             Registrar
@@ -101,7 +101,7 @@ export function Register() {
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             Já tem uma conta?
             <Link
               to="/login"

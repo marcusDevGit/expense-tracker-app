@@ -17,9 +17,9 @@ import { useToast } from "@/hooks/use-toast";
 import { statsService } from "@/services/stats.service";
 import { walletService } from "@/services/wallet.service";
 import { Input } from "@/components/ui/input";
-import { formatCurrency } from "@/lib/utils";
-
+import { useFormatters } from "@/hooks/use-formatters";
 export function Categories() {
+  const { formatCurrency } = useFormatters();
   const [selectedWalletId, setSelectedWalletId] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const currentMonth = new Date().getMonth() + 1;
@@ -130,7 +130,7 @@ export function Categories() {
                 return (
                   <Card
                     key={category.id}
-                    className={`border-slate-200 hover:border-slate-300 transition-colors shadow-sm overflow-hidden ${
+                    className={`border-border hover:border-slate-300 transition-colors shadow-sm overflow-hidden ${
                       isOverBudget ? "border-red-200 bg-red-50/10" : ""
                     }`}
                   >
@@ -147,10 +147,10 @@ export function Categories() {
                             {category.icon || "Tag"}
                           </div>
                           <div>
-                            <h3 className="font-semibold text-slate-900 leading-none mb-1">
+                            <h3 className="font-semibold text-foreground leading-none mb-1">
                               {category.name}
                             </h3>
-                            <p className="text-xs text-slate-500">
+                            <p className="text-xs text-muted-foreground">
                               {isSystem ? "Sistema" : "Personalizada"}
                             </p>
                           </div>
@@ -203,7 +203,7 @@ export function Categories() {
                           )}
                         </div>
                         {Number(category.budget) > 0 && (
-                          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                          <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
                             <div
                               className={`h-full transition-all duration-500 ${
                                 (stats?.categoryBreakdown.find(

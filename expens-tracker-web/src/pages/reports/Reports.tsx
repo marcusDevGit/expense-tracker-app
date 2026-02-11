@@ -3,7 +3,7 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { statsService } from "@/services/stats.service";
 import { walletService } from "@/services/wallet.service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatCurrency } from "@/lib/utils";
+import { useFormatters } from "@/hooks/use-formatters";
 import {
   TrendingUp,
   ArrowUpRight,
@@ -26,6 +26,7 @@ import {
 } from "recharts";
 
 export function Reports() {
+  const { formatCurrency } = useFormatters();
   const [selectedWalletId, setSelectedWalletId] = useState<string>("");
   const now = new Date();
   const month = now.getMonth() + 1;
@@ -76,7 +77,7 @@ export function Reports() {
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Relatórios</h1>
           <select
-            className="border rounded-md p-2 text-sm bg-white"
+            className="border rounded-md p-2 text-sm bg-card"
             value={selectedWalletId}
             onChange={(e) => setSelectedWalletId(e.target.value)}
           >

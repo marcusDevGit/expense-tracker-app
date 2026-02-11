@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { X, Loader2, AlertTriangle } from "lucide-react";
 import { statsService } from "@/services/stats.service";
-import { formatCurrency } from "@/lib/utils";
+import { useFormatters } from "@/hooks/use-formatters";
 
 interface Props {
   isOpen: boolean;
@@ -18,6 +18,7 @@ interface Props {
 }
 
 export function CreateExpenseModal({ isOpen, onClose }: Props) {
+  const { formatCurrency } = useFormatters();
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurrenceType, setRecurrenceType] = useState<
     "WEEKLY" | "MONTHLY" | "YEARLY"
@@ -94,7 +95,7 @@ export function CreateExpenseModal({ isOpen, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-2xl p-6 animate-in zoom-in duration-200">
+      <div className="w-full max-w-md bg-card rounded-xl shadow-2xl p-6 animate-in zoom-in duration-200">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">Nova Despesa</h2>
           <Button variant="ghost" onClick={onClose}>

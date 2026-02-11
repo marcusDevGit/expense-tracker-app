@@ -6,6 +6,7 @@ import { Dashboard } from "@/pages/dashboard/Dashboard";
 import { Wallets } from "@/pages/wallets/Wallets";
 import { Expenses } from "@/pages/expenses/Expenses";
 import { Categories } from "@/pages/categories/Categories";
+import { Settings } from "@/pages/settings/Settings";
 import { useAuthStore } from "@/stores/auth.store";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -57,6 +58,14 @@ export function AppRoutes() {
           element={
             <PrivateRoute>
               <Reports />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <PrivateRoute>
+              <Settings />
             </PrivateRoute>
           }
         />

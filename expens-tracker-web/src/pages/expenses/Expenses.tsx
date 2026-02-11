@@ -4,7 +4,7 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { CreateExpenseModal } from "./CreateExpenseModal";
 import { expenseService } from "@/services/expense.service";
 import { walletService } from "@/services/wallet.service";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { useFormatters } from "@/hooks/use-formatters";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -19,6 +19,7 @@ import { categoryService } from "@/services/category.service";
 import { Input } from "@/components/ui/input";
 
 export function Expenses() {
+  const { formatCurrency, formatDate } = useFormatters();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const now = new Date();
@@ -90,20 +91,20 @@ export function Expenses() {
     <PageLayout>
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Despesas
           </h1>
           <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
             <Plus size={18} /> Nova Despesa
           </Button>
         </div>
-        <div className="flex flex-wrap items-center gap-3 bg-white p-4 rounded-xl border border-slate-200">
+        <div className="flex flex-wrap items-center gap-3 bg-card p-4 rounded-xl border border-border">
           <div className="flex-1 min-w-[200px]">
-            <Label className="text-xs text-slate-500 mb-1 block">
+            <Label className="text-xs text-muted-foreground mb-1 block">
               Carteira
             </Label>
             <select
-              className="w-full border rounded-md p-2 text-sm"
+              className="w-full border rounded-md p-2 text-sm bg-background text-foreground"
               value={selectedWalletId}
               onChange={(e) => setSelectedWalletId(e.target.value)}
             >
@@ -115,9 +116,11 @@ export function Expenses() {
             </select>
           </div>
           <div className="w-full sm:w-40">
-            <Label className="text-xs text-slate-500 mb-1 block">Mês</Label>
+            <Label className="text-xs text-muted-foreground mb-1 block">
+              Mês
+            </Label>
             <select
-              className="w-full border rounded-md p-2 text-sm"
+              className="w-full border rounded-md p-2 text-sm bg-background text-foreground"
               value={month}
               onChange={(e) => setMonth(Number(e.target.value))}
             >
@@ -129,9 +132,11 @@ export function Expenses() {
             </select>
           </div>
           <div className="w-full sm:w-28">
-            <Label className="text-xs text-slate-500 mb-1 block">Ano</Label>
+            <Label className="text-xs text-muted-foreground mb-1 block">
+              Ano
+            </Label>
             <select
-              className="w-full border rounded-md p-2 text-sm"
+              className="w-full border rounded-md p-2 text-sm bg-background text-foreground"
               value={year}
               onChange={(e) => setYear(Number(e.target.value))}
             >
@@ -143,11 +148,11 @@ export function Expenses() {
             </select>
           </div>
           <div className="flex-1 min-w-[150px]">
-            <Label className="text-xs text-slate-500 mb-1 block">
+            <Label className="text-xs text-muted-foreground mb-1 block">
               Categoria
             </Label>
             <select
-              className="w-full border rounded-md p-2 text-sm"
+              className="w-full border rounded-md p-2 text-sm bg-background text-foreground"
               value={selectedCategoryId}
               onChange={(e) => {
                 setSelectedCategoryId(e.target.value);
@@ -181,11 +186,11 @@ export function Expenses() {
 
         <div className="grid gap-2">
           {isLoading ? (
-            <div className="text-center py-10 text-slate-500">
+            <div className="text-center py-10 text-muted-foreground">
               Carregando despesas...
             </div>
           ) : expenses?.length === 0 ? (
-            <div className="text-center py-10 text-slate-500">
+            <div className="text-center py-10 text-muted-foreground">
               Nenhuma despesa encontrada.
             </div>
           ) : (
@@ -199,7 +204,7 @@ export function Expenses() {
                 .map((expense) => (
                   <Card
                     key={expense.id}
-                    className="overflow-hidden border-slate-200"
+                    className="overflow-hidden border-border"
                   >
                     <CardContent className="p-4 flex items-center justify-between">
                       <div className="flex items-center gap-4">
@@ -207,10 +212,10 @@ export function Expenses() {
                           <Receipt size={20} />
                         </div>
                         <div>
-                          <p className="font-semibold text-slate-900">
+                          <p className="font-semibold text-foreground">
                             {expense.description}
                           </p>
-                          <div className="flex gap-3 text-xs text-slate-500 mt-1">
+                          <div className="flex gap-3 text-xs text-muted-foreground mt-1">
                             <span className="flex items-center gap-1">
                               <CalendarIcon size={12} />
                               {formatDate(expense.expenseDate)}
@@ -237,7 +242,7 @@ export function Expenses() {
                   >
                     Anterior
                   </Button>
-                  <span className="text-sm text-slate-600">
+                  <span className="text-sm text-muted-foreground">
                     Página {page} de {meta.totalPages}
                   </span>
                   <Button

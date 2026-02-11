@@ -51,10 +51,10 @@ export function Login() {
   };
 
   return (
-    <div className="flex bg-slate-50 min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg border-slate-200">
+    <div className="flex bg-muted min-h-screen items-center justify-center p-4">
+      <Card className="w-full max-w-md shadow-lg border-border">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center text-slate-900">
+          <CardTitle className="text-2xl font-bold text-center text-foreground">
             Expense Tracker
           </CardTitle>
           <CardDescription className="text-center">
@@ -95,7 +95,7 @@ export function Login() {
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             Ainda não tem conta? ,
             <Link
               to="/register"

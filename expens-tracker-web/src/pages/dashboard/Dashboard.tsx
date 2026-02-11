@@ -3,7 +3,7 @@ import { PageLayout } from "@/components/layout/PageLayout";
 import { statsService } from "@/services/stats.service";
 import { walletService } from "@/services/wallet.service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatCurrency } from "@/lib/utils";
+import { useFormatters } from "@/hooks/use-formatters";
 import {
   Wallet,
   TrendingDown,
@@ -28,6 +28,7 @@ import {
 } from "recharts";
 
 export function Dashboard() {
+  const { formatCurrency } = useFormatters();
   const [selectedWalletId, setSelectedWalletId] = useState<string>("");
   const now = new Date();
   const month = now.getMonth() + 1;
@@ -74,7 +75,7 @@ export function Dashboard() {
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Dashboard</h1>
           <select
-            className="border rounded-md p-2 text-sm bg-white"
+            className="border rounded-md p-2 text-sm bg-background"
             value={selectedWalletId}
             onChange={(e) => setSelectedWalletId(e.target.value)}
           >
@@ -94,7 +95,7 @@ export function Dashboard() {
             </CardHeader>
             <CardContent>
               <div
-                className={`text-2xl font-bold ${(currentWallet?.currentBalance || 0) < 0 ? "text-red-600" : "text-slate-900"}`}
+                className={`text-2xl font-bold ${(currentWallet?.currentBalance || 0) < 0 ? "text-red-600" : "text-foreground"}`}
               >
                 {formatCurrency(currentWallet?.currentBalance || 0)}
               </div>
@@ -121,7 +122,7 @@ export function Dashboard() {
                   (stats?.month.totalExpense || 0) && (
                   <p className="text-[10px] text-muted-foreground mt-1">
                     Previsão:{" "}
-                    <span className="font-semibold text-slate-700">
+                    <span className="font-semibold text-foreground/70">
                       {formatCurrency(stats.month.predictedTotal)}
                     </span>
                   </p>
@@ -140,13 +141,13 @@ export function Dashboard() {
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-slate-50/50">
+          <Card className="bg-muted/30">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Próximo Mês</CardTitle>
               <CalendarDays className="h-4 w-4 text-orange-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-700">
+              <div className="text-2xl font-bold text-foreground/70">
                 {formatCurrency(stats?.month.nextMonthTotal || 0)}
               </div>
               <p className="text-[10px] text-muted-foreground mt-1">
@@ -173,21 +174,21 @@ export function Dashboard() {
                   .map((c) => (
                     <div
                       key={c.name}
-                      className="flex flex-col p-3 rounded-lg bg-white border border-red-100 shadow-sm"
+                      className="flex flex-col p-3 rounded-lg bg-background border border-red-100 shadow-sm"
                     >
                       <div className="flex justify-between items-start mb-1">
-                        <span className="font-semibold text-slate-900">
+                        <span className="font-semibold text-foreground">
                           {c.name}
                         </span>
                         <span className="text-red-600 font-bold text-xs">
                           +{formatCurrency(c.total - c.budget)}
                         </span>
                       </div>
-                      <div className="text-[10px] text-slate-500 mb-2">
+                      <div className="text-[10px] text-muted-foreground mb-2">
                         Limite: {formatCurrency(c.budget)} | Gasto:{" "}
                         {formatCurrency(c.total)}
                       </div>
-                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
                         <div
                           className="h-full bg-red-500"
                           style={{ width: "100%" }}
@@ -299,7 +300,7 @@ export function Dashboard() {
               {stats?.categoryBreakdown?.map((cat, i) => (
                 <div
                   key={cat.name}
-                  className="flex justify-between items-center p-3 rounded-lg bg-slate-50 border border-slate-100"
+                  className="flex justify-between items-center p-3 rounded-lg bg-card border border-slate-100"
                 >
                   <span className="flex items-center gap-2 font-medium">
                     <div
@@ -309,7 +310,7 @@ export function Dashboard() {
                     {cat.name}
                   </span>
                   <div className="text-right">
-                    <div className="font-bold text-slate-900">
+                    <div className="font-bold text-foreground">
                       {formatCurrency(cat.total)}
                     </div>
                     <div className="text-[11px] text-blue-600 font-bold">
