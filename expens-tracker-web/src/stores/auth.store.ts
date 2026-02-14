@@ -5,6 +5,7 @@ interface User {
   id: string;
   name: string;
   email: string;
+  defaultWalletId?: string;
 };
 
 interface AuthStore {
@@ -13,10 +14,11 @@ interface AuthStore {
   isAuthenticated: boolean;
   login: (user: User, accessToken: string) => void;
   logout: () => void;
+  updateUser: (user: Partial<User>) => void;
 }
 
 export const useAuthStore = create<AuthStore>()(
-  persist((set) => ({
+  persist((set, get) => ({
     user: null,
     accessToken: null,
     isAuthenticated: false,
@@ -29,6 +31,13 @@ export const useAuthStore = create<AuthStore>()(
     logout: () => {
       localStorage.removeItem("@expense:token");
       set({ user: null, accessToken: null, isAuthenticated: false });
+    },
+
+    updateUser: (newUser) => {
+      const currentUser = get().user;
+      if (currentUser) {
+        set({ user: { ...currentUser, ...newUser } });
+      }
     },
   }),
     {

@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { statsService } from "@/services/stats.service";
+import { useSettingsStore } from "@/stores/settings.store";
+import { useAuthStore } from "@/stores/auth.store";
 import { walletService } from "@/services/wallet.service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFormatters } from "@/hooks/use-formatters";
@@ -29,6 +31,8 @@ import {
 
 export function Dashboard() {
   const { formatCurrency } = useFormatters();
+  const settings = useSettingsStore();
+  const { user } = useAuthStore();
   const [selectedWalletId, setSelectedWalletId] = useState<string>("");
   const now = new Date();
   const month = now.getMonth() + 1;
@@ -41,9 +45,10 @@ export function Dashboard() {
 
   useEffect(() => {
     if (wallets?.length && !selectedWalletId) {
-      setSelectedWalletId(wallets[0].id);
+      const defaultId = user?.defaultWalletId || wallets[0].id;
+      setSelectedWalletId(defaultId);
     }
-  }, [wallets]);
+  }, [wallets, user?.defaultWalletId]);
 
   const { data: stats } = useQuery({
     queryKey: ["stats", selectedWalletId, month, year],
@@ -97,7 +102,9 @@ export function Dashboard() {
               <div
                 className={`text-2xl font-bold ${(currentWallet?.currentBalance || 0) < 0 ? "text-red-600" : "text-foreground"}`}
               >
-                {formatCurrency(currentWallet?.currentBalance || 0)}
+                {settings.hideBalances
+                  ? "••••••"
+                  : formatCurrency(currentWallet?.currentBalance || 0)}
               </div>
             </CardContent>
           </Card>

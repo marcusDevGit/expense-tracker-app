@@ -13,16 +13,17 @@ datasource db {
 }
 
 model User {
-  id           String         @id @default(uuid())
-  name         String
-  email        String         @unique
-  password     String
-  wallets      Wallet[]
-  categories   Category[]
-  refreshToken RefreshToken[]
+  id                 String               @id @default(uuid())
+  name               String
+  email              String               @unique
+  password           String
+  wallets            Wallet[]
+  categories         Category[]
+  refreshToken       RefreshToken[]
   passwordResetToken PasswordResetToken[]
-  CreatedAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  defaultWalletId    String?
+  CreatedAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
 }
 
 model Wallet {
@@ -46,29 +47,31 @@ model Category {
   icon      String?
   budget    Decimal?  @default(0)
   userId    String?
-  user      User?      @relation(fields: [userId], references: [id])
+  user      User?     @relation(fields: [userId], references: [id])
   expenses  Expense[]
   createdAt DateTime  @default(now())
+  isActive  Boolean   @default(true)
+  order     Int       @default(0)
 
   @@index([name, userId])
 }
 
 model Expense {
-  id              String          @id @default(uuid())
-  description     String
-  amount          Decimal
-  expenseDate     DateTime
-  isRecurring     Boolean         @default(false)
-  recurrenceType  RecurrenceType?
-  paymentMethod   PaymentMethod @default(CASH)
-  installments    Int?            @default(1)
-  currentInstallment Int?           @default(1)
-  walletId        String
-  categoryId      String?
-  wallet          Wallet          @relation(fields: [walletId], references: [id])
-  category        Category?       @relation(fields: [categoryId], references: [id])
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  id                 String          @id @default(uuid())
+  description        String
+  amount             Decimal
+  expenseDate        DateTime
+  isRecurring        Boolean         @default(false)
+  recurrenceType     RecurrenceType?
+  paymentMethod      PaymentMethod   @default(CASH)
+  installments       Int?            @default(1)
+  currentInstallment Int?            @default(1)
+  walletId           String
+  categoryId         String?
+  wallet             Wallet          @relation(fields: [walletId], references: [id])
+  category           Category?       @relation(fields: [categoryId], references: [id])
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
 
   @@index([walletId])
   @@index([categoryId])
@@ -89,12 +92,13 @@ model RefreshToken {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
 model PasswordResetToken {
-  id String @id @default(uuid())
+  id        String   @id @default(uuid())
   tokenHash String
-  userId String
+  userId    String
   expiresAt DateTime
-  used Boolean @default(false)
+  used      Boolean  @default(false)
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

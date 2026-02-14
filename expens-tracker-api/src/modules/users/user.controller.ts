@@ -14,9 +14,30 @@ export class UserController {
     }
   }
 
-  async getProfile(req: Request, res: Response) {}
+  async getProfile(req: Request, res: Response) { }
 
-  async updateProfile(req: Request, res: Response) {}
+  async updateProfile(req: Request, res: Response) {
+    try {
+      const userId = req.userId!;
+      const { name, email, defaultWalletId } = req.body
+      const user = await userService.update(userId, { name, email, defaultWalletId });
+      return res.json(user);
 
-  async deleteProfile(req: Request, res: Response) {}
+    } catch (err: any) {
+      return res.status(400).json({ error: err.message })
+    }
+  }
+
+  async updatePassword(req: Request, res: Response) {
+    try {
+      const userId = req.userId!;
+      const { oldPassword, newPassword } = req.body;
+      await userService.updatePassword(userId, oldPassword, newPassword);
+      return res.json({ message: "Senha atualizada com sucesso!" })
+    } catch (err: any) {
+      return res.status(400).json({ error: err.message })
+    }
+  }
+
+  async deleteProfile(req: Request, res: Response) { }
 }

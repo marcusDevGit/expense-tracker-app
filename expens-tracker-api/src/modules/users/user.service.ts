@@ -20,7 +20,32 @@ export class UserService {
     return user;
   }
 
-  async update(id: string, data: any) {}
+  async update(id: string, data: any) {
+    return prisma.user.update({
+      where: { id },
+      data,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        defaultWalletId: true
+      }
+    })
+  }
 
-  async delete(id: string) {}
+  async updatePassword(id: string, oldPass: string, newPass: string) {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) throw new Error("Usuário não encontrado!");
+
+    const passwordMatch = await bcrypt.compare(oldPass, user.password);
+    if (!passwordMatch) throw new Error("Senha incorreta!");
+
+    const hashedPassword = await bcrypt.hash(newPass, 10);
+    await prisma.user.update({
+      where: { id },
+      data: { password: hashedPassword }
+    })
+  }
+
+  async delete(id: string) { }
 }

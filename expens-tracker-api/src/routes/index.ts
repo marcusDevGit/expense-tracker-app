@@ -5,6 +5,7 @@ import walletRoutes from "../modules/wallets/wallet.routes.js";
 import categoryRoutes from "../modules/categories/category.routes.js";
 import expenseRoutes from "../modules/expenses/expense.routes.js";
 import statsRoutes from "../modules/stats/stats.routes.js";
+import dataRoutes from "../modules/data/data.routes.js"
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use("/wallets", walletRoutes);
 router.use("/categories", categoryRoutes);
 router.use("/expenses", expenseRoutes);
 router.use("/stats", statsRoutes);
+router.use("/data", dataRoutes);
 
 export default router;

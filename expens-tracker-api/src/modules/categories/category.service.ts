@@ -24,10 +24,13 @@ export class CategoryService {
     });
   }
 
-  async listByUser(userId: string) {
+  async listByUser(userId: string, onlyActive = false) {
     return prisma.category.findMany({
-      where: { OR: [{ userId: userId }, { userId: null }] },
-      orderBy: { name: "asc" },
+      where: {
+        OR: [{ userId: userId }, { userId: null }],
+        isActive: onlyActive ? true : undefined
+      },
+      orderBy: { order: "asc" },
     });
   }
 
@@ -44,17 +47,19 @@ export class CategoryService {
     return category;
   }
 
-  async update(userId: string, categoryId: string, name: string, color?: string, icon?: string, budget?: number) {
+  async update(userId: string, categoryId: string, data: any) {
     await this.findById(userId, categoryId);
     return prisma.category.update({
       where: {
         id: categoryId,
       },
       data: {
-        name,
-        color,
-        icon,
-        budget,
+        name: data.name,
+        color: data.color,
+        icon: data.icon,
+        budget: data.budget,
+        isActive: data.isActive,
+        order: data.order
       },
     });
   }
