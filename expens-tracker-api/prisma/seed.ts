@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { prisma } from "../src/config/database";
+import { prisma } from "../src/config/database.js";
 import { randomUUID } from "node:crypto";
 
 const DEFAULT_CATEGORIES = [

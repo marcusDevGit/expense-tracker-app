@@ -32,7 +32,7 @@ describe('ExpenseService', () => {
             const expense = await expenseService.create(userId, expenseData);
 
             expect(expense).toHaveProperty('id');
-            expect(expense.description).toBe('Supermercado');
+            expect(expense!.description).toBe('Supermercado');
             expect(prismaMock.expense.create).toHaveBeenCalledTimes(1);
         });
 

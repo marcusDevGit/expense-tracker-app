@@ -48,11 +48,11 @@ export class WalletController {
     const { id } = req.params;
     const { month, year } = req.query;
 
-    const wallet = await walletService.getWalletWithBalance(userId, id);
+    const wallet = await walletService.getWalletWithBalance(userId, String(id));
 
     const expenses = await expenseService.listByMonth(
       userId,
-      id,
+      String(id),
       Number(month),
       Number(year),
     );

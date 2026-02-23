@@ -39,7 +39,7 @@ export class ExpenseController {
     const userId = req.userId!;
     const { id } = req.params;
 
-    const expense = await expenseService.findById(userId, id);
+    const expense = await expenseService.findById(userId, String(id));
     return res.json(ApiResponse.success(expense));
   }
 
@@ -47,7 +47,7 @@ export class ExpenseController {
     const userId = req.userId!;
     const { id } = req.params;
 
-    const expense = await expenseService.update(userId, id, req.body);
+    const expense = await expenseService.update(userId, String(id), req.body);
     return res.json(ApiResponse.success(expense));
   }
 
@@ -55,7 +55,7 @@ export class ExpenseController {
     const userId = req.userId!;
     const { id } = req.params;
 
-    await expenseService.delete(userId, id);
+    await expenseService.delete(userId, String(id));
     return res.status(204).json(ApiResponse.success(null));
   }
 }
