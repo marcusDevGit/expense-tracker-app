@@ -28,9 +28,9 @@ export class WalletService {
     });
     const result = [];
 
-    return wallets.map((wallet) => {
+    return wallets.map((wallet: any) => {
       const balance = wallet.expenses.reduce(
-        (acc, tx) => acc.minus(tx.amount),
+        (acc: Decimal, tx: any) => acc.minus(tx.amount),
         new Decimal(wallet.initialBalance),
       );
 
@@ -59,7 +59,7 @@ export class WalletService {
     }
 
     const balance = wallet.expenses.reduce(
-      (acc, tx) => acc.minus(tx.amount),
+      (acc: Decimal, tx: any) => acc.minus(tx.amount),
       new Decimal(wallet.initialBalance),
     );
 

@@ -29,12 +29,12 @@ export class StatsService {
         const currentDay = isCurrentMonth ? now.getDate() : daysInMonth;
         const daysRemaining = isCurrentMonth ? (daysInMonth - currentDay + 1) : 0;
 
-        const totalExpense = expenses.reduce((acc, curr) => acc + Number(curr.amount), 0);
-        const predictedTotal = (totalExpense / currentDay) * daysInMonth;
+        const totalExpense = expenses.reduce((acc: number, curr: any) => acc + Number(curr.amount), 0);
+        const predictedTotal = currentDay > 0 ? (totalExpense / currentDay) * daysInMonth : 0;
 
         const categoryMap: Record<string, { id: string, name: string, total: number, budget: number }> = {};
 
-        expenses.forEach(exp => {
+        expenses.forEach((exp: any) => {
             const catId = exp.categoryId || "none";
             const catName = exp.category?.name || "Sem Categoria";
             const budget = Number(exp.category?.budget) || 0;
@@ -73,8 +73,8 @@ export class StatsService {
             where: { walletId, isRecurring: true }
         });
 
-        let nextMonthTotal = nextMonthExpenses.reduce((acc, curr) => acc + Number(curr.amount), 0);
-        recurringTemplates.forEach(template => {
+        let nextMonthTotal = nextMonthExpenses.reduce((acc: number, curr: any) => acc + Number(curr.amount), 0);
+        recurringTemplates.forEach((template: any) => {
             if (template.recurrenceType === 'MONTHLY') {
                 nextMonthTotal += Number(template.amount);
             } else if (template.recurrenceType === 'WEEKLY') {
@@ -122,7 +122,7 @@ export class StatsService {
                 sortKey: date.getTime()
             };
         }
-        expenses.forEach(exp => {
+        expenses.forEach((exp: any) => {
             const date = new Date(exp.expenseDate);
             const key = `${date.getFullYear()}-${date.getMonth()}`;
             if (trendsMap[key]) {

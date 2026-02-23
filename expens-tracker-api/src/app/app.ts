@@ -8,7 +8,13 @@ import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from '../config/swagger.js';
 
 const app = express();
-app.use(cors());
+
+const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
+app.use(cors({
+    origin: process.env.NODE_ENV === "production" ? frontendUrl : true,
+    credentials: true
+}));
 app.use(express.json());
 app.use(cookieParser());
 
