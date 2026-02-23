@@ -4,7 +4,7 @@ const options: swaggerJsdoc.Options = {
     definition: {
         openapi: '3.0.0',
         info: {
-            title: 'Expense Tracker API',
+            title: 'Expense Tracker API - V1',
             version: '1.0.0',
             description: 'API para controle de despesas pessoais, carteiras e recorrências.',
             contact: {
@@ -27,8 +27,8 @@ const options: swaggerJsdoc.Options = {
         ],
         servers: [
             {
-                url: 'http://localhost:3333',
-                description: 'Servidor Local',
+                url: 'http://localhost:3333/api/v1',
+                description: 'Servidor Local (v1)',
             },
         ],
     },

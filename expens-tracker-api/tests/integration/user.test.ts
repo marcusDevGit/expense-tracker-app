@@ -22,7 +22,7 @@ describe('Users Routes (Integration)', () => {
             } as any);
 
             const response = await request(app)
-                .post('/api/users/register')
+                .post('/api/v1/users/register')
                 .send(userData);
             expect(response.status).toBe(201);
 

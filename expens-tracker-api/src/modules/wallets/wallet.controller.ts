@@ -1,129 +1,61 @@
 import { Request, Response } from "express";
 import { WalletService } from "./wallet.service.js";
 import { ExpenseService } from "../expenses/expense.service.js";
+import { ApiResponse } from "../../shared/utils/ApiResponse.js";
 
 const walletService = new WalletService();
 const expenseService = new ExpenseService();
 
 export class WalletController {
   async create(req: Request, res: Response) {
-    try {
-      const userId = req.userId;
-
-      if (!userId) {
-        return res.status(401).json({ error: "Usuário não autenticado" });
-      }
-
-      const wallet = await walletService.create(userId, req.body);
-      return res.status(201).json(wallet);
-    } catch (err: any) {
-      return res.status(400).json({ error: err.message });
-    }
+    const userId = req.userId!;
+    const wallet = await walletService.create(userId, req.body);
+    return res.status(201).json(ApiResponse.success(wallet));
   }
 
   async list(req: Request, res: Response) {
-    try {
-      const userId = req.userId;
-      if (!userId) {
-        return res.status(401).json({ error: "Usuário não autenticado" });
-      }
-      const wallets = await walletService.listByUser(userId);
-      return res.json(wallets);
-    } catch (err: any) {
-      return res.status(400).json({ error: err.message });
-    }
+    const userId = req.userId!;
+    const wallets = await walletService.listByUser(userId);
+    return res.json(ApiResponse.success(wallets));
   }
 
   async show(req: Request, res: Response) {
-    try {
-      const userId = req.userId;
+    const userId = req.userId!;
+    const { id } = req.params;
 
-      if (!userId) {
-        return res.status(401).json({ error: "Usuário não autenticado" });
-      }
-
-      const { id } = req.params;
-
-      if (!id || typeof id !== "string") {
-        return res.status(400).json({ error: "ID da carteira inválido" });
-      }
-
-      const wallet = await walletService.findById(userId, id);
-      return res.json(wallet);
-    } catch (err: any) {
-      return res.status(400).json({ error: err.message });
-    }
+    const wallet = await walletService.findById(userId, id);
+    return res.json(ApiResponse.success(wallet));
   }
 
   async update(req: Request, res: Response) {
-    try {
-      const userId = req.userId;
+    const userId = req.userId!;
+    const { id } = req.params;
 
-      if (!userId) {
-        return res.status(401).json({ error: "Usuário não autenticado" });
-      }
-
-      const { id } = req.params;
-
-      if (!id || typeof id !== "string") {
-        return res.status(400).json({ error: "ID da carteira inválido" });
-      }
-
-      const wallet = await walletService.update(userId, id, req.body);
-      return res.json(wallet);
-    } catch (err: any) {
-      return res.status(400).json({ error: err.message });
-    }
+    const wallet = await walletService.update(userId, id, req.body);
+    return res.json(ApiResponse.success(wallet));
   }
 
   async delete(req: Request, res: Response) {
-    try {
-      const userId = req.userId;
+    const userId = req.userId!;
+    const { id } = req.params;
 
-      if (!userId) {
-        return res.status(401).json({ error: "Usuário não autenticado" });
-      }
-
-      const { id } = req.params;
-
-      if (!id || typeof id !== "string") {
-        return res.status(400).json({ error: "ID da carteira inválido" });
-      }
-
-      await walletService.delete(userId, id);
-      return res.status(204).send();
-    } catch (err: any) {
-      return res.status(400).json({ error: err.message });
-    }
+    await walletService.delete(userId, id);
+    return res.status(204).json(ApiResponse.success(null));
   }
 
   async dashboard(req: Request, res: Response) {
-    try {
-      const userId = req.userId;
+    const userId = req.userId!;
+    const { id } = req.params;
+    const { month, year } = req.query;
 
-      if (!userId) {
-        return res.status(401).json({ error: "Usuário não autenticado" });
-      }
+    const wallet = await walletService.getWalletWithBalance(userId, id);
 
-      const { id } = req.params;
-
-      if (!id || typeof id !== "string") {
-        return res.status(400).json({ error: "ID da carteira inválido" });
-      }
-
-      const { month, year } = req.query;
-
-      const wallet = await walletService.getWalletWithBalance(userId, id);
-
-      const expenses = await expenseService.listByMonth(
-        userId,
-        id,
-        Number(month),
-        Number(year),
-      );
-      return res.json({ wallet, transactions: expenses });
-    } catch (err: any) {
-      return res.status(400).json({ error: err.message });
-    }
+    const expenses = await expenseService.listByMonth(
+      userId,
+      id,
+      Number(month),
+      Number(year),
+    );
+    return res.json(ApiResponse.success({ wallet, transactions: expenses }));
   }
 }

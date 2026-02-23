@@ -15,89 +15,47 @@ export class ExpenseController {
   }
 
   async list(req: Request, res: Response) {
-    try {
-      const userId = req.userId;
+    const userId = req.userId!;
 
-      if (!userId) {
-        return res.status(401).json({ error: "Usuário não autenticado" });
-      }
+    const { walletId, month, year, page, limit, categoryId } = req.query;
 
-      const { walletId, month, year, page, limit, categoryId } = req.query;
-
-      if (!walletId || !month || !year) {
-        return res.status(400).json({ error: "Parâmetros inválidos" });
-      }
-
-      const expenses = await expenseService.listByMonth(
-        userId,
-        String(walletId),
-        Number(month),
-        Number(year),
-        page ? Number(page) : 1,
-        limit ? Number(limit) : 20,
-        categoryId ? String(categoryId) : undefined,
-      );
-      return res.json(expenses);
-    } catch (err: any) {
-      return res.status(400).json({ error: err.message });
+    if (!walletId || !month || !year) {
+      return res.status(400).json({ error: "Parâmetros inválidos" });
     }
+
+    const expenses = await expenseService.listByMonth(
+      userId,
+      String(walletId),
+      Number(month),
+      Number(year),
+      page ? Number(page) : 1,
+      limit ? Number(limit) : 20,
+      categoryId ? String(categoryId) : undefined,
+    );
+
+    return res.json(ApiResponse.success(expenses));
   }
   async show(req: Request, res: Response) {
-    try {
-      const userId = req.userId;
-      if (!userId) {
-        return res.status(401).json({ error: "Usuário não autenticado" });
-      }
-      const { id } = req.params;
-      if (!id || typeof id !== "string") {
-        return res.status(400).json({ error: "ID da despesa inválido" });
-      }
-      const expense = await expenseService.findById(userId, id);
-      return res.json(expense);
-    } catch (err: any) {
-      return res.status(400).json({ error: err.message });
-    }
+    const userId = req.userId!;
+    const { id } = req.params;
+
+    const expense = await expenseService.findById(userId, id);
+    return res.json(ApiResponse.success(expense));
   }
 
   async update(req: Request, res: Response) {
-    try {
-      const userId = req.userId;
+    const userId = req.userId!;
+    const { id } = req.params;
 
-      if (!userId) {
-        return res.status(401).json({ error: "Usuário não autenticado" });
-      }
-
-      const { id } = req.params;
-
-      if (!id || typeof id !== "string") {
-        return res.status(400).json({ error: "ID da despesa inválido" });
-      }
-
-      const expense = await expenseService.update(userId, id, req.body);
-      return res.json(expense);
-    } catch (err: any) {
-      return res.status(400).json({ error: err.message });
-    }
+    const expense = await expenseService.update(userId, id, req.body);
+    return res.json(ApiResponse.success(expense));
   }
 
   async delete(req: Request, res: Response) {
-    try {
-      const userId = req.userId;
+    const userId = req.userId!;
+    const { id } = req.params;
 
-      if (!userId) {
-        return res.status(401).json({ error: "Usuário não autenticado" });
-      }
-
-      const { id } = req.params;
-
-      if (!id || typeof id !== "string") {
-        return res.status(400).json({ error: "ID da despesa inválido" });
-      }
-
-      await expenseService.delete(userId, id);
-      return res.status(204).send();
-    } catch (err: any) {
-      return res.status(400).json({ error: err.message });
-    }
+    await expenseService.delete(userId, id);
+    return res.status(204).json(ApiResponse.success(null));
   }
 }

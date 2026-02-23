@@ -24,7 +24,7 @@ describe('Auth Routes (Integration)', () => {
             vi.spyOn(bcrypt, 'compare').mockImplementation(async () => true);
 
             const response = await request(app)
-                .post('/api/auth/login')
+                .post('/api/v1/auth/login')
                 .send(credentials);
 
             expect(response.status).toBe(200);
@@ -37,7 +37,7 @@ describe('Auth Routes (Integration)', () => {
             prismaMock.user.findUnique.mockResolvedValue(null);
 
             const response = await request(app)
-                .post('/api/auth/login')
+                .post('/api/v1/auth/login')
                 .send({ email: 'wrong@test.com', password: '123' });
 
             expect(response.status).toBe(401);

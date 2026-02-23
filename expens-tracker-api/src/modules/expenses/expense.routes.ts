@@ -47,13 +47,32 @@ router.post("/", controller.create.bind(controller));
  * @swagger
  * /api/expenses:
  *   get:
- *     summary: Lista todas as despesas do usuário
+ *     summary: Lista todas as despesas do usuário (filtrada por mês/ano)
  *     tags: [Expenses]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: month
+ *         required: true
+ *         schema: { type: number, example: 10 }
+ *       - in: query
+ *         name: year
+ *         required: true
+ *         schema: { type: number, example: 2024 }
+ *       - in: query
+ *         name: walletId
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: page
+ *         schema: { type: number, default: 1 }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: number, default: 20 }
  *     responses:
  *       200:
- *         description: Lista de despesas
+ *         description: Lista filtrada e paginada de despesas
  */
 router.get("/", controller.list.bind(controller));
 

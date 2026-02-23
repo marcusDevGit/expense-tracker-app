@@ -31,7 +31,7 @@ describe('Expenses Routes (Integration)', () => {
             } as any);
 
             const response = await request(app)
-                .post('/api/expenses')
+                .post('/api/v1/expenses')
                 .send(expenseData);
 
             expect(response.status).toBe(201);
