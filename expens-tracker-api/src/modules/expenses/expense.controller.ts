@@ -1,22 +1,17 @@
 import { Request, Response } from "express";
 import { ExpenseService } from "./expense.service.js";
+import { ApiResponse } from "../../shared/utils/ApiResponse.js";
 
 const expenseService = new ExpenseService();
 
 export class ExpenseController {
   async create(req: Request, res: Response) {
-    try {
-      const userId = req.userId;
 
-      if (!userId) {
-        return res.status(401).json({ error: "Usuário não autenticado" });
-      }
+    const userId = req.userId!;
 
-      const expense = await expenseService.create(userId, req.body);
-      return res.status(201).json(expense);
-    } catch (err: any) {
-      return res.status(400).json({ error: err.message });
-    }
+    const expense = await expenseService.create(userId, req.body);
+    return res.status(201).json(ApiResponse.success(expense));
+
   }
 
   async list(req: Request, res: Response) {

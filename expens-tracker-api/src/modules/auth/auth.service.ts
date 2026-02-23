@@ -3,16 +3,17 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { prisma } from "../../config/database.js";
 import { jwtConfig, jwtRefreshToken } from "../../config/jwt.js";
 import crypto from "node:crypto";
+import { AppError } from "../../shared/errors/AppError.js";
 
 export class AuthService {
   async authenticate({ email, password }: any) {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      throw new Error("Email ou senha incorreto!");
+      throw new AppError("Email ou senha incorreto!", 401);
     }
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      throw new Error("Email ou senha incorreto!");
+      throw new AppError("Email ou senha incorreto!", 401);
     }
 
     const accessToken = jwt.sign({ sub: user.id }, jwtConfig.secret, {

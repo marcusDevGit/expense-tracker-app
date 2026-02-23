@@ -12,7 +12,10 @@
     "studio": "prisma studio",
     "prisma:status": "prisma migrate status",
     "prisma:migrate:diff": "prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma",
-    "test": "jest",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest run --watch",
+    "test:ui": "vitest run --ui",
     "db": "docker start expense-tracker-postgres",
     "seed": "tsx prisma/seed.ts",
     "type-check": "tsc --noEmit"
@@ -37,11 +40,17 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.0.10",
     "@types/pg": "^8.16.0",
+    "@types/supertest": "^6.0.3",
+    "@vitest/coverage-v8": "^4.0.18",
+    "@vitest/ui": "^4.0.18",
     "dotenv": "^17.2.3",
     "prisma": "^7.3.0",
+    "supertest": "^7.2.2",
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18",
+    "vitest-mock-extended": "^3.1.0"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

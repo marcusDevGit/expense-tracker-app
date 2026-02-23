@@ -2,7 +2,6 @@ import "dotenv/config";
 import { prisma } from "../src/config/database";
 import { randomUUID } from "node:crypto";
 
-// 🎨 Categorias padrão que cada usuário receberá
 const DEFAULT_CATEGORIES = [
   {
     name: "Alimentação",
@@ -56,16 +55,13 @@ async function createDefaultCategories(userId: string) {
   return categories;
 }
 
-/**
- * Cria um usuário de exemplo
- */
 async function createExampleUser() {
   const user = await prisma.user.create({
     data: {
       id: randomUUID(),
       name: "Marcus Phellypp",
       email: "marcus@example.com",
-      password: "$2b$10$EXAMPLE_HASH", // Em produção, use bcrypt.hash()
+      password: "$2b$10$EXAMPLE_HASH",
     },
   });
 
@@ -73,9 +69,6 @@ async function createExampleUser() {
   return user;
 }
 
-/**
- * Cria uma carteira de exemplo
- */
 async function createExampleWallet(userId: string) {
   const wallet = await prisma.wallet.create({
     data: {
@@ -90,9 +83,6 @@ async function createExampleWallet(userId: string) {
   return wallet;
 }
 
-/**
- * Cria algumas despesas de exemplo
- */
 async function createExampleExpenses(
   walletId: string,
   categories: { id: string; name: string }[],
@@ -137,13 +127,9 @@ async function createExampleExpenses(
   console.log(`✅ ${expenses.length} despesas criadas`);
 }
 
-/**
- * Função principal de seed
- */
 async function main() {
   console.log("\n🌱 Iniciando seed do banco de dados...\n");
 
-  // Limpar dados existentes (opcional - comente se não quiser)
   console.log("🗑️  Limpando dados existentes...");
   await prisma.expense.deleteMany();
   await prisma.category.deleteMany();
@@ -151,19 +137,15 @@ async function main() {
   await prisma.user.deleteMany();
   console.log("   ✅ Dados limpos\n");
 
-  // Criar usuário
   console.log("👤 Criando usuário de exemplo...");
   const user = await createExampleUser();
 
-  // Criar categorias padrão para o usuário
   console.log("\n📁 Criando categorias padrão...");
   const categories = await createDefaultCategories(user.id);
 
-  // Criar carteira
   console.log("\n💰 Criando carteira...");
   const wallet = await createExampleWallet(user.id);
 
-  // Criar despesas de exemplo
   console.log("\n💸 Criando despesas de exemplo...");
   await createExampleExpenses(wallet.id, categories);
 

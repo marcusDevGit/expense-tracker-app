@@ -1,13 +1,10 @@
 {
   "extends": "@tsconfig/node24/tsconfig.json",
   "compilerOptions": {
-    // Diretório de saída para arquivos compilados
     "outDir": "./dist",
 
-    // Tipos customizados
     "typeRoots": ["./node_modules/@types", "src/@types"],
 
-    // Recursos ESNext adicionais
     "lib": [
       "ES2024",
       "ESNext.Array",

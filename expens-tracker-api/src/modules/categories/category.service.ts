@@ -1,5 +1,7 @@
 import { prisma } from "../../config/database.js";
 import { randomUUID } from "crypto";
+import { AppError } from "../../shared/errors/AppError.js";
+
 
 export class CategoryService {
   async create(userId: string, name: string, color?: string, icon?: string, budget?: number) {
@@ -10,7 +12,7 @@ export class CategoryService {
       },
     });
     if (existingCategory) {
-      throw new Error("Categoria já existe");
+      throw new AppError("Categoria já existe", 409);
     }
     return prisma.category.create({
       data: {
@@ -42,7 +44,7 @@ export class CategoryService {
       },
     });
     if (!category) {
-      throw new Error("Categoria não encontrada");
+      throw new AppError("Categoria não encontrada", 404);
     }
     return category;
   }

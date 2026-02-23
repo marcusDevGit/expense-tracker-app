@@ -1,5 +1,6 @@
 import { prisma } from "../../config/database.js";
 import { Decimal } from "@prisma/client/runtime/client";
+import { AppError } from "../../shared/errors/AppError.js";
 
 export class WalletService {
   async create(userId: string, data: any) {
@@ -54,7 +55,7 @@ export class WalletService {
       },
     });
     if (!wallet) {
-      throw new Error("Carteira não encontrada");
+      throw new AppError("Carteira não encontrada", 404);
     }
 
     const balance = wallet.expenses.reduce(
@@ -75,7 +76,7 @@ export class WalletService {
       where: { id: walletId, userId },
     });
     if (!wallet) {
-      throw new Error("Carteira não encontrada");
+      throw new AppError("Carteira não encontrada", 404);
     }
     return wallet;
   }

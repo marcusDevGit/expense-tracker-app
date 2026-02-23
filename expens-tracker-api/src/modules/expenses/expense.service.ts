@@ -1,6 +1,7 @@
 import { prisma } from "../../config/database.js";
 import { Prisma } from "@prisma/client";
 import crypto from "crypto";
+import { AppError } from "../../shared/errors/AppError.js";
 
 export class ExpenseService {
   async create(
@@ -9,7 +10,7 @@ export class ExpenseService {
     const wallet = await prisma.wallet.findFirst({
       where: { id: data.walletId, userId },
     });
-    if (!wallet) throw new Error("carteira invalida")
+    if (!wallet) throw new AppError("Carteira inválida", 404);
 
     const categoryId = await this.getOrCreateCategory(userId, data.categoryId, data.newCategoryName);
     const installmentsCount = data.installments || 1;
@@ -82,7 +83,7 @@ export class ExpenseService {
         },
       },
     });
-    if (!expense) throw new Error("Gasto não encontrado");
+    if (!expense) throw new AppError("Gasto não encontrado", 404);
     return expense;
   }
 
@@ -136,7 +137,7 @@ export class ExpenseService {
       const category = await prisma.category.findFirst({
         where: { id: categoryId, OR: [{ userId }, { userId: null }] },
       });
-      if (!category) throw new Error("categoria invalida");
+      if (!category) throw new AppError("Categoria inválida", 404);
       return categoryId;
     }
     return null;
