@@ -7,10 +7,129 @@ const controller = new ExpenseController();
 
 router.use(authMiddleware);
 
+/**
+ * @swagger
+ * tags:
+ *   name: Expenses
+ *   description: Registro e controle de gastos/despesas
+ */
+/**
+ * @swagger
+ * /api/expenses:
+ *   post:
+ *     summary: Registra uma nova despesa (Simples, Parcelada ou Recorrente)
+ *     tags: [Expenses]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [description, amount, walletId, categoryId, expenseDate]
+ *             properties:
+ *               description: { type: string, example: 'Netflix' }
+ *               amount: { type: number, example: 55.90 }
+ *               walletId: { type: string }
+ *               categoryId: { type: string }
+ *               expenseDate: { type: string, format: date-time }
+ *               installments: { type: number, description: 'Número de parcelas', example: 1 }
+ *               isRecurring: { type: boolean, example: true }
+ *               recurrenceType: { type: string, enum: [WEEKLY, MONTHLY, YEARLY] }
+ *     responses:
+ *       201:
+ *         description: Despesa criada com sucesso
+ */
 router.post("/", controller.create.bind(controller));
+
+/**
+ * @swagger
+ * /api/expenses:
+ *   get:
+ *     summary: Lista todas as despesas do usuário
+ *     tags: [Expenses]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de despesas
+ */
 router.get("/", controller.list.bind(controller));
+
+/**
+ * @swagger
+ * /api/expenses/{id}:
+ *   get:
+ *     summary: Retorna uma despesa pelo ID
+ *     tags: [Expenses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Despesa encontrada
+ */
 router.get("/:id", controller.show.bind(controller));
+
+/**
+ * @swagger
+ * /api/expenses/{id}:
+ *   put:
+ *     summary: Atualiza uma despesa
+ *     tags: [Expenses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               description: { type: string, example: 'Netflix' }
+ *               amount: { type: number, example: 55.90 }
+ *               walletId: { type: string }
+ *               categoryId: { type: string }
+ *               expenseDate: { type: string, format: date-time }
+ *               installments: { type: number, description: 'Número de parcelas', example: 1 }
+ *               isRecurring: { type: boolean, example: true }
+ *               recurrenceType: { type: string, enum: [WEEKLY, MONTHLY, YEARLY] }
+ *     responses:
+ *       200:
+ *         description: Despesa atualizada com sucesso
+ */
 router.put("/:id", controller.update.bind(controller));
+
+/**
+ * @swagger
+ * /api/expenses/{id}:
+ *   delete:
+ *     summary: Deleta uma despesa
+ *     tags: [Expenses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Despesa deletada com sucesso
+ */
 router.delete("/:id", controller.delete.bind(controller));
 
 export default router;
