@@ -24,7 +24,7 @@ export interface PaginatedResponse<T> {
 
 export const expenseService = {
     async list(params?: { walletId?: string; month?: number; year?: number; page?: number; limit?: number; categoryId?: string }) {
-        const response = await api.get<PaginatedResponse<Expense>>("/expenses", { params })
+        const response = await api.get<PaginatedResponse<Expense>>("expenses", { params })
         return response.data
     },
 
@@ -40,10 +40,10 @@ export const expenseService = {
         paymentMethod?: any
         installments: number
     }) {
-        const response = await api.post<Expense>("/expenses", data)
+        const response = await api.post<Expense>("expenses", data)
         return response.data
     },
     async delete(id: string) {
-        await api.delete(`/expenses/${id}`)
+        await api.delete(`expenses/${id}`)
     }
 }
