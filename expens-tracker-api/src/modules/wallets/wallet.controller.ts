@@ -23,7 +23,7 @@ export class WalletController {
     const userId = req.userId!;
     const { id } = req.params;
 
-    const wallet = await walletService.findById(userId, id);
+    const wallet = await walletService.findById(userId, String(id));
     return res.json(ApiResponse.success(wallet));
   }
 
@@ -31,7 +31,7 @@ export class WalletController {
     const userId = req.userId!;
     const { id } = req.params;
 
-    const wallet = await walletService.update(userId, id, req.body);
+    const wallet = await walletService.update(userId, String(id), req.body);
     return res.json(ApiResponse.success(wallet));
   }
 
@@ -39,7 +39,7 @@ export class WalletController {
     const userId = req.userId!;
     const { id } = req.params;
 
-    await walletService.delete(userId, id);
+    await walletService.delete(userId, String(id));
     return res.status(204).json(ApiResponse.success(null));
   }
 
