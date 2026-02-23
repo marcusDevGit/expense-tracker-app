@@ -1,210 +1,70 @@
 # 💰 Expense Tracker - Full Stack Application
 
-> 🚧 **Status:** Em desenvolvimento
+[![Status](https://img.shields.io/badge/Status-Production--Ready-brightgreen)](https://expense-tracker-app-rho-lake.vercel.app)
 
-Aplicação fullstack para gerenciamento de despesas pessoais, permitindo controle financeiro completo através de carteiras, categorias e despesas recorrentes.
-
----
-
-## 📋 Estrutura do Projeto
-
-```
-expense-tracker-app/
-├── expens-tracker-api/     # 🟢 Backend API (Implementado)
-│   ├── src/
-│   ├── prisma/
-│   └── README.md          # Documentação da API
-│
-└── expense-tracker-web/    # 🔴 Frontend Web (A implementar)
-    └── README.md          # Documentação do frontend
-```
+Sistema completo de controle financeiro pessoal, desenvolvido com uma arquitetura moderna, escalável e segura.
 
 ---
 
-## 🎯 Componentes do Projeto
+## 🏗️ O Ecossistema
 
-### ✅ Backend API - `expens-tracker-api/`
+O projeto é dividido em dois grandes pilares integrados:
 
-**Status:** Implementado e funcional
+### 1. 🧠 [Backend API](./expens-tracker-api)
 
-Tecnologias:
+API RESTful construída com **Node.js**, **Express v5** e **Prisma ORM**.
 
-- Node.js + TypeScript
-- Express.js
-- Prisma ORM v7.3.0
-- PostgreSQL
-- JWT Authentication
+- **Hospedagem:** Railway
+- **Banco de Dados:** PostgreSQL (Neon.tech)
+- **Funcionalidades:** Auth JWT, Refresh Tokens, Recuperação de Senha, CRUDs validados com Zod.
+- **Docs:** Swagger UI integrado.
 
-[📖 Ver documentação completa do backend →](./expens-tracker-api/README.md)
+### 2. 🎨 [Frontend Web](./expens-tracker-web)
 
-**Endpoints disponíveis:**
+Single Page Application (SPA) reativa construída com **React 19** e **Vite**.
 
-- ✅ Autenticação (login/logout/registro)
-- ✅ Gerenciamento de usuários
-- 🔄 Carteiras (estrutura criada)
-- 🔄 Despesas (estrutura criada)
-- 🔄 Categorias (estrutura criada)
+- **Hospedagem:** Vercel
+- **Estado:** Zustand + TanStack Query para sincronização de dados.
+- **UI/UX:** TailwindCSS + Shadcn/UI com suporte a Dark Mode e Gráficos Recharts.
 
 ---
 
-### 🔜 Frontend Web - `expense-tracker-web/`
+## 🚀 Links do Projeto em Produção
 
-**Status:** A ser implementado
-
-Tecnologias planejadas:
-
-- React.js / Next.js
-- TypeScript
-- TailwindCSS / Styled Components
-- React Query / SWR
-- React Hook Form + Zod
-
-**Funcionalidades planejadas:**
-
-- 🔲 Sistema de autenticação com JWT
-- 🔲 Dashboard com visão geral das finanças
-- 🔲 Gerenciamento de carteiras
-- 🔲 Registro e categorização de despesas
-- 🔲 Gráficos e relatórios
-- 🔲 Tema claro/escuro
+- **Aplicação Web:** [https://expense-tracker-app-rho-lake.vercel.app](https://expense-tracker-app-rho-lake.vercel.app)
+- **Documentação da API:** [https://expense-tracker-app-production-dc4e.up.railway.app/api-docs](https://expense-tracker-app-production-dc4e.up.railway.app/api-docs)
 
 ---
 
-## 🚀 Como Começar
+## 🛠️ Stack Tecnológico Global
 
-### Pré-requisitos
-
-- Node.js >= 24.x
-- npm >= 10.x
-- PostgreSQL >= 14.x
-- Git
-
-### 1. Clone o repositório
-
-```bash
-git clone <url-do-repositorio>
-cd expense-tracker-app
-```
-
-### 2. Configure o Backend
-
-```bash
-cd expens-tracker-api
-npm install
-cp .env.example .env
-
-# Configure as variáveis no .env
-# Execute as migrations
-npx prisma migrate dev
-
-# Inicie o servidor
-npm run dev
-```
-
-O backend estará rodando em: `http://localhost:3333`
-
-[📖 Documentação completa do backend](./expens-tracker-api/README.md)
-
-### 3. Configure o Frontend
-
-_🚧 A ser implementado_
+| Camada        | Tecnologias                                            |
+| :------------ | :----------------------------------------------------- |
+| **Linguagem** | TypeScript (Fullstack)                                 |
+| **Frontend**  | React, TailwindCSS, Lucide Icons, Shadcn/UI            |
+| **Backend**   | Express, Prisma ORM, Bcrypt, JsonWebToken              |
+| **Infra**     | Neon (DB), Railway (API), Vercel (Web), GitHub Actions |
 
 ---
 
-## 📊 Progresso do Projeto
+## 📊 Progresso Final
 
-### Backend (expens-tracker-api)
-
-- [x] Estrutura inicial do projeto
-- [x] Configuração do TypeScript e Express
-- [x] Setup do Prisma ORM v7 com PostgreSQL
-- [x] Módulo de autenticação (JWT)
-  - [x] Registro de usuários
-  - [x] Login
-  - [x] Logout
-  - [x] Middleware de autenticação
-- [x] Módulo de usuários
-  - [x] CRUD básico
-  - [x] Validações com Zod
-- [x] Schema do banco de dados
-  - [x] Model User
-  - [x] Model Wallet
-  - [x] Model Category
-  - [x] Model Expense
-- [ ] Implementação completa de Wallets
-- [ ] Implementação completa de Expenses
-- [ ] Implementação completa de Categories
-- [ ] Testes unitários e de integração
-- [ ] Documentação Swagger/OpenAPI
-
-### Frontend (expense-tracker-web)
-
-- [ ] Setup inicial do projeto
-- [ ] Configuração de rotas
-- [ ] Sistema de autenticação
-- [ ] Dashboard
-- [ ] Gerenciamento de carteiras
-- [ ] Gerenciamento de despesas
-- [ ] Gerenciamento de categorias
-- [ ] Gráficos e relatórios
-- [ ] Responsividade mobile
+- [x] Arquitetura de Pastas Padronizada ✅
+- [x] Migração para PostgreSQL Remoto (Neon) ✅
+- [x] Implementação de Autenticação Robusta ✅
+- [x] Gerenciamento de Carteiras e Despesas ✅
+- [x] Tratamento de Erros Global (AppError) ✅
+- [x] Documentação Swagger ✅
+- [x] Deploy Contínuo (CI/CD) ✅
 
 ---
 
-## 🛠️ Stack Tecnológico
+## 👨‍💻 Autor e Mantenedor
 
-### Backend
-
-- **Runtime:** Node.js 24.x
-- **Linguagem:** TypeScript
-- **Framework:** Express.js
-- **ORM:** Prisma 7.3.0
-- **Banco de Dados:** PostgreSQL
-- **Autenticação:** JWT + Bcrypt
-- **Validação:** Zod
-
-### Frontend (Planejado)
-
-- **Framework:** React.js / Next.js
-- **Linguagem:** TypeScript
-- **Estilização:** TailwindCSS
-- **Gerenciamento de Estado:** Context API / Zustand
-- **Requisições HTTP:** Axios / Fetch + React Query
-- **Validação de Formulários:** React Hook Form + Zod
-
----
-
-## 📝 Convenções do Projeto
-
-### Commits
-
-Seguimos o padrão de commits semânticos:
-
-```
-feat: adiciona nova funcionalidade
-fix: corrige um bug
-docs: atualização de documentação
-refactor: refatoração de código
-test: adição ou modificação de testes
-chore: tarefas de manutenção
-```
-
-### Branches
-
-- `main` - Código em produção
-- `develop` - Branch de desenvolvimento
-- `feature/*` - Novas funcionalidades
-- `fix/*` - Correções de bugs
-- `docs/*` - Atualizações de documentação
-
----
-
-## 👨‍💻 Autor
-
-**Marcus Phellypp**
+O projeto foi desenvolvido por **Marcus Phellypp**, focado em aplicar as melhores práticas de desenvolvimento web moderno e engenharia de software.
 
 ---
 
 ## 📄 Licença
 
-Este projeto está sob a licença MIT.
+Este projeto está sob a licença [MIT](./LICENSE).
