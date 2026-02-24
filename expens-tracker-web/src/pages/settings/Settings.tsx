@@ -76,13 +76,11 @@ export function Settings() {
   >({
     mutationFn: userService.updateProfile,
     onSuccess: (data) => {
-      console.log("sucesso no backend", data);
       updateUser(data);
       toast({ title: "Sucesso", description: "Perfil atualizado com sucesso" });
       queryClient.invalidateQueries({ queryKey: ["profile"] });
     },
     onError: (err: any) => {
-      console.error("❌ Erro na Mutation:", err);
       toast({
         title: "Erro",
         description: err.response?.data?.error || "Erro ao atualizar perfil",
@@ -143,17 +141,13 @@ export function Settings() {
       });
       return;
     }
-    console.log("🚀 Iniciando salvamento...");
     try {
       await updateProfileMutation.mutateAsync({
         name,
         email,
         defaultWalletId,
       });
-      console.log("🏁 mutateAsync terminou");
     } catch (error) {
-      console.error("🏁 Erro no handleSave:", error);
-
       toast({
         title: "Erro",
         description: "Erro ao atualizar perfil",
@@ -216,12 +210,12 @@ export function Settings() {
         <Card className="border-none shadow-md overflow-hidden bg-card/80 backdrop-blur-sm">
           <CardHeader className="border-b bg-muted/50">
             <div className="flex items-center gap-2">
-              <div className="p-2 bg-blue-100 text-blue-600 roundedo-lg">
+              <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
                 <Coins size={20} />
               </div>
               <div>
                 <CardTitle className="text-lg">
-                  Preferencia de Orçamento
+                  Preferência de Orçamento
                 </CardTitle>
                 <CardDescription>
                   Ajuste como o app calcula seu ciclo financeiro
@@ -421,7 +415,7 @@ export function Settings() {
               </div>
               <div>
                 <CardTitle className="text-lg">
-                  Privacidade e Interfaxe
+                  Privacidade e Interface
                 </CardTitle>
                 <CardDescription>
                   Controle como suas informações são exibidas
@@ -487,7 +481,7 @@ export function Settings() {
           </CardContent>
         </Card>
 
-        <Card className="border-none shadow-md overflow-hidden bg-card/80 backdrop.blur-sm">
+        <Card className="border-none shadow-md overflow-hidden bg-card/80 backdrop-blur-sm">
           <CardHeader className="border-b bg-muted/50">
             <div className="flex items-center gap-2">
               <div className="p-2 bg-slate-100 text-slate-600 rounded-lg">
@@ -506,17 +500,17 @@ export function Settings() {
               <Button
                 onClick={handleExport}
                 variant="outline"
-                className="flex flex-col items-center justify-center h-24 gap2 border-dashed border-2 hover:border-indigo-500 hover:bg-indigo-50/50 transition-all"
+                className="flex flex-col items-center justify-center h-24 gap-2 border-dashed border-2 hover:border-indigo-500 hover:bg-indigo-50/50 transition-all"
               >
                 <Download className="text-indigo-600" size={24} />
-                <span className="text-xs font-semibold">Exporta CSV</span>
+                <span className="text-xs font-semibold">Exportar CSV</span>
               </Button>
               <Button
                 variant="outline"
-                className="flex flex-col items-center justify-center h-24 gap2 border-dashed border-2 hover:border-indigo-500 hover:bg-indigo-50/50 transition-all"
+                className="flex flex-col items-center justify-center h-24 gap-2 border-dashed border-2 hover:border-indigo-500 hover:bg-indigo-50/50 transition-all"
               >
                 <Upload className="text-indigo-600" size={24} />
-                <span className="text-xs font-semibold">Importa OFX/CSV</span>
+                <span className="text-xs font-semibold">Importar OFX/CSV</span>
               </Button>
 
               <Button

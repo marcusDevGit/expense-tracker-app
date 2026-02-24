@@ -18,11 +18,16 @@ const menuItems = [
   { label: "Configurações", icon: Settings, path: "/settings" },
 ];
 
-export function Sidebar() {
+export function Sidebar({ className }: { className?: string }) {
   const location = useLocation();
 
   return (
-    <aside className="w-64 bg-slate-900 text-white flex flex-col h-full">
+    <aside
+      className={cn(
+        "flex w-64 bg-slate-900 text-white flex-col h-full shrink-0",
+        className,
+      )}
+    >
       <div className="p-6">
         <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
           Expense Tracker

@@ -158,7 +158,7 @@ export function CreateCategoryModal({ isOpen, onClose, category }: Props) {
           </div>
 
           <div className="space-y-3">
-            <Label>Icone / Emoje</Label>
+            <Label>Ícone / Emoji</Label>
             <div className="grid grid-cols-5 gap-2 border rounded-md p-2">
               {EMOJIS.map((e) => (
                 <button
@@ -180,7 +180,7 @@ export function CreateCategoryModal({ isOpen, onClose, category }: Props) {
             {mutation.isPending ? (
               <Loader2 className="animate-spin" />
             ) : category ? (
-              "Salva Alterações"
+              "Salvar Alterações"
             ) : (
               "Criar Categoria"
             )}

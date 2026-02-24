@@ -92,8 +92,8 @@ export function Dashboard() {
           </select>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
+          <Card className="col-span-1">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Saldo Atual</CardTitle>
               <Wallet className="h-4 w-4 text-emerald-500" />
@@ -108,7 +108,7 @@ export function Dashboard() {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="col-span-1">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">
                 Despesas (Mês)
@@ -137,7 +137,7 @@ export function Dashboard() {
               )}
             </CardContent>
           </Card>
-          <Card>
+          <Card className="col-span-1">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Transações</CardTitle>
               <Receipt className="h-4 w-4 text-blue-500" />
@@ -148,7 +148,7 @@ export function Dashboard() {
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-muted/30">
+          <Card className="col-span-1 bg-muted/30">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">Próximo Mês</CardTitle>
               <CalendarDays className="h-4 w-4 text-orange-500" />
@@ -164,7 +164,6 @@ export function Dashboard() {
           </Card>
         </div>
 
-        {/* Alertas de Orçamento */}
         {stats?.categoryBreakdown.some(
           (c) => c.budget > 0 && c.total > c.budget,
         ) && (
@@ -209,7 +208,6 @@ export function Dashboard() {
         )}
 
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* Gráfico de Pizza */}
           <Card className="p-4 min-w-0">
             <CardHeader className="p-0 mb-4">
               <CardTitle className="text-lg flex items-center gap-2">
