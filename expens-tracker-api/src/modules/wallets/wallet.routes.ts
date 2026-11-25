@@ -22,7 +22,7 @@ router.use(authMiddleware);
  */
 /** 
  * @swagger
- * /api/wallets:
+ * /wallets:
  *   post:
  *     summary: Cria uma nova carteira
  *     tags: [Wallets]
@@ -34,11 +34,11 @@ router.use(authMiddleware);
  *         application/json:
  *           schema:
  *             type: object
- *             required: [name, balance]
+ *             required: [name]
  *             properties:
  *               name: { type: string, example: "Carteira de Conta Corrente" }
- *               balance: { type: number, example: 1000 }
- *               color: { type: string, example: "#FF0000" }
+ *               currency: { type: string, example: "BRL" }
+ *               initialBalance: { type: number, example: 1000 }
  *     responses:
  *       201:
  *         description: Carteira criada com sucesso
@@ -47,7 +47,7 @@ router.post("/", validate(createWalletSchema), walletController.create.bind(wall
 
 /**
  * @swagger
- * /api/wallets:
+ * /wallets:
  *   get:
  *     summary: Lista todas as carteiras
  *     tags: [Wallets]
@@ -59,13 +59,78 @@ router.post("/", validate(createWalletSchema), walletController.create.bind(wall
  */
 router.get("/", walletController.list.bind(walletController));
 
+/**
+ * @swagger
+ * /wallets/{id}:
+ *   get:
+ *     summary: Retorna uma carteira pelo ID
+ *     tags: [Wallets]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Carteira encontrada
+ */
 router.get("/:id", validate(walletIdParamSchema, "params"), walletController.show.bind(walletController));
+
+/**
+ * @swagger
+ * /wallets/{id}:
+ *   put:
+ *     summary: Atualiza uma carteira
+ *     tags: [Wallets]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name: { type: string, example: "Carteira Principal" }
+ *               currency: { type: string, example: "BRL" }
+ *     responses:
+ *       200:
+ *         description: Carteira atualizada com sucesso
+ */
 router.put("/:id", validate(walletIdParamSchema, "params"), validate(updateWalletSchema), walletController.update.bind(walletController));
+
+/**
+ * @swagger
+ * /wallets/{id}:
+ *   delete:
+ *     summary: Remove uma carteira
+ *     tags: [Wallets]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       204:
+ *         description: Carteira removida com sucesso
+ */
 router.delete("/:id", validate(walletIdParamSchema, "params"), walletController.delete.bind(walletController));
 
 /**
  * @swagger
- * /api/wallets/{id}/dashboard:
+ * /wallets/{id}/dashboard:
  *   get:
  *     summary: Retorna o dashboard de uma carteira
  *     tags: [Wallets]

@@ -19,7 +19,7 @@ const authcontroller = new AuthController();
 
 /**
  * @swagger
- * /api/auth/login:
+ * /auth/login:
  *   post:
  *     summary: Realiza o login do usuário
  *     tags: [Auth]
@@ -43,19 +43,19 @@ router.post("/login", validate(loginSchema), authcontroller.login);
 
 /**
  * @swagger
- * /api/auth/logout:
+ * /auth/logout:
  *   post:
  *     summary: Realiza o logout do usuário
  *     tags: [Auth]
  *     responses:
- *       200:
+ *       204:
  *         description: Logout realizado com sucesso
  */
 router.post("/logout", authcontroller.logout);
 
 /**
  * @swagger
- * /api/auth/refresh:
+ * /auth/refresh:
  *   post:
  *     summary: Gera um novo access token usando o refresh token
  *     tags: [Auth]
@@ -67,7 +67,7 @@ router.post("/refresh", authcontroller.refresh);
 
 /**
  * @swagger
- * /api/auth/forgot-password:
+ * /auth/forgot-password:
  *   post:
  *     summary: Solicita link de recuperação de senha
  *     tags: [Auth]
@@ -88,7 +88,7 @@ router.post("/forgot-password", validate(forgotPasswordSchema), authcontroller.f
 
 /**
  * @swagger
- * /api/auth/reset-password:
+ * /auth/reset-password:
  *   post:
  *     summary: Define uma nova senha usando um token de recuperação
  *     tags: [Auth]

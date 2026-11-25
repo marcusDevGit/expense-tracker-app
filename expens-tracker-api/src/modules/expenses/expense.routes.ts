@@ -22,7 +22,7 @@ router.use(authMiddleware);
  */
 /**
  * @swagger
- * /api/expenses:
+ * /expenses:
  *   post:
  *     summary: Registra uma nova despesa (Simples, Parcelada ou Recorrente)
  *     tags: [Expenses]
@@ -52,7 +52,7 @@ router.post("/", validate(createExpenseSchema), controller.create.bind(controlle
 
 /**
  * @swagger
- * /api/expenses:
+ * /expenses:
  *   get:
  *     summary: Lista todas as despesas do usuário (filtrada por mês/ano)
  *     tags: [Expenses]
@@ -85,7 +85,7 @@ router.get("/", validate(listExpensesQuerySchema, "query"), controller.list.bind
 
 /**
  * @swagger
- * /api/expenses/{id}:
+ * /expenses/{id}:
  *   get:
  *     summary: Retorna uma despesa pelo ID
  *     tags: [Expenses]
@@ -105,7 +105,7 @@ router.get("/:id", validate(expenseIdParamSchema, "params"), controller.show.bin
 
 /**
  * @swagger
- * /api/expenses/{id}:
+ * /expenses/{id}:
  *   put:
  *     summary: Atualiza uma despesa
  *     tags: [Expenses]
@@ -140,7 +140,7 @@ router.put("/:id", validate(expenseIdParamSchema, "params"), validate(updateExpe
 
 /**
  * @swagger
- * /api/expenses/{id}:
+ * /expenses/{id}:
  *   delete:
  *     summary: Deleta uma despesa
  *     tags: [Expenses]
@@ -153,7 +153,7 @@ router.put("/:id", validate(expenseIdParamSchema, "params"), validate(updateExpe
  *         schema:
  *           type: string
  *     responses:
- *       200:
+ *       204:
  *         description: Despesa deletada com sucesso
  */
 router.delete("/:id", validate(expenseIdParamSchema, "params"), controller.delete.bind(controller));

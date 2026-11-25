@@ -21,7 +21,7 @@ router.use(authMiddleware);
  */
 /**
  * @swagger
- * /api/categories:
+ * /categories:
  *   post:
  *     summary: Cria uma nova categoria personalizada
  *     tags: [Categories]
@@ -46,7 +46,7 @@ router.post("/", validate(createCategorySchema), categoryController.create.bind(
 
 /**
  * @swagger
- * /api/categories:
+ * /categories:
  *   get:
  *     summary: Lista as categorias do usuário e as globais
  *     tags: [Categories]
@@ -60,7 +60,7 @@ router.get("/", categoryController.list.bind(categoryController));
 
 /**
  * @swagger
- * /api/categories/{id}:
+ * /categories/{id}:
  *   get:
  *     summary: Retorna uma categoria pelo ID
  *     tags: [Categories]
@@ -80,7 +80,7 @@ router.get("/:id", validate(categoryIdParamSchema, "params"), categoryController
 
 /**
  * @swagger
- * /api/categories/{id}:
+ * /categories/{id}:
  *   put:
  *     summary: Atualiza uma categoria
  *     tags: [Categories]
@@ -109,7 +109,7 @@ router.put("/:id", validate(categoryIdParamSchema, "params"), validate(updateCat
 
 /**
  * @swagger
- * /api/categories/{id}:
+ * /categories/{id}:
  *   delete:
  *     summary: Deleta uma categoria
  *     tags: [Categories]
@@ -122,7 +122,7 @@ router.put("/:id", validate(categoryIdParamSchema, "params"), validate(updateCat
  *         schema:
  *           type: string
  *     responses:
- *       200:
+ *       204:
  *         description: Categoria deletada com sucesso
  */
 router.delete("/:id", validate(categoryIdParamSchema, "params"), categoryController.delete.bind(categoryController));

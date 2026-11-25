@@ -16,7 +16,7 @@ const userController = new UserController();
 
 /**
  * @swagger
- * /api/users/register:
+ * /users/register:
  *   post:
  *     summary: Registra um novo usuário
  *     tags: [Users]
@@ -39,7 +39,7 @@ router.post("/register", validate(registerSchema), userController.register);
 
 /**
  * @swagger
- * /api/users/profile:
+ * /users/profile:
  *   get:
  *     summary: Retorna o perfil do usuário logado
  *     tags: [Users]
@@ -53,7 +53,7 @@ router.get("/profile", authMiddleware, userController.getProfile);
 
 /**
  * @swagger
- * /api/users/profile:
+ * /users/profile:
  *   put:
  *     summary: Atualiza os dados do perfil
  *     tags: [Users]
@@ -76,7 +76,7 @@ router.put("/profile", authMiddleware, validate(updateProfileSchema), userContro
 
 /**
  * @swagger
- * /api/users/password:
+ * /users/password:
  *   put:
  *     summary: Altera a senha do usuário
  *     tags: [Users]
@@ -88,9 +88,9 @@ router.put("/profile", authMiddleware, validate(updateProfileSchema), userContro
  *         application/json:
  *           schema:
  *             type: object
- *             required: [currentPassword, newPassword]
+ *             required: [oldPassword, newPassword]
  *             properties:
- *               currentPassword: { type: string }
+ *               oldPassword: { type: string }
  *               newPassword: { type: string }
  *     responses:
  *       200:
@@ -100,14 +100,14 @@ router.put("/password", authMiddleware, userController.updatePassword);
 
 /**
  * @swagger
- * /api/users/profile:
+ * /users/profile:
  *   delete:
  *     summary: Remove a conta do usuário
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
  *     responses:
- *       200:
+ *       204:
  *         description: Conta removida com sucesso
  */
 router.delete("/profile", authMiddleware, userController.deleteProfile);
