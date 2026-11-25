@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { ExpenseService } from "./expense.service.js";
 import { ApiResponse } from "../../shared/utils/ApiResponse.js";
+import { AppError } from "../../shared/errors/AppError.js";
 
 const expenseService = new ExpenseService();
 
@@ -20,7 +21,7 @@ export class ExpenseController {
     const { walletId, month, year, page, limit, categoryId } = req.query;
 
     if (!walletId || !month || !year) {
-      return res.status(400).json({ error: "Parâmetros inválidos" });
+      throw new AppError("Parâmetros inválidos", 400);
     }
 
     const expenses = await expenseService.listByMonth(
@@ -56,6 +57,6 @@ export class ExpenseController {
     const { id } = req.params;
 
     await expenseService.delete(userId, String(id));
-    return res.status(204).json(ApiResponse.success(null));
+    return res.status(204).send();
   }
 }

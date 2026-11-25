@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { StatsService } from "./stats.service.js";
 import { ApiResponse } from "../../shared/utils/ApiResponse.js";
+import { AppError } from "../../shared/errors/AppError.js";
 
 export const statsService = new StatsService();
 
@@ -10,7 +11,7 @@ export class StatsController {
     const { walletId, month, year } = req.query;
 
     if (!walletId || !month || !year) {
-      return res.status(400).json({ error: "Parâmetros ausentes" });
+      throw new AppError("Parâmetros ausentes", 400);
     }
 
     const stats = await statsService.getDashboardData(

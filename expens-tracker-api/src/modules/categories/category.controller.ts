@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { CategoryService } from "./category.service.js";
 import { ApiResponse } from "../../shared/utils/ApiResponse.js";
+import { AppError } from "../../shared/errors/AppError.js";
 
 const categoryService = new CategoryService();
 
@@ -10,13 +11,13 @@ export class CategoryController {
     const userId = req.userId;
 
     if (!userId) {
-      return res.status(401).json({ error: "Usuário não autenticado" });
+      throw new AppError("Usuário não autenticado", 401);
     }
 
     const { name, color, icon, budget } = req.body;
 
     if (!name) {
-      return res.status(400).json({ error: "Nome é obrigatório" });
+      throw new AppError("Nome é obrigatório", 400);
     }
 
     const category = await categoryService.create(userId!, name, color, icon, budget);
@@ -27,7 +28,7 @@ export class CategoryController {
     const userId = req.userId;
 
     if (!userId) {
-      return res.status(401).json({ error: "Usuário não autenticado" });
+      throw new AppError("Usuário não autenticado", 401);
     }
 
     const categories = await categoryService.listByUser(userId);
@@ -39,13 +40,13 @@ export class CategoryController {
     const userId = req.userId;
 
     if (!userId) {
-      return res.status(401).json({ error: "Usuário não autenticado" });
+      throw new AppError("Usuário não autenticado", 401);
     }
 
     const { id } = req.params;
 
     if (!id || typeof id !== "string") {
-      return res.status(400).json({ error: "ID da categoria inválido" });
+      throw new AppError("ID da categoria inválido", 400);
     }
 
     const category = await categoryService.findById(userId, id);
@@ -67,17 +68,17 @@ export class CategoryController {
     const userId = req.userId;
 
     if (!userId) {
-      return res.status(401).json({ error: "Usuário não autenticado" });
+      throw new AppError("Usuário não autenticado", 401);
     }
 
     const { id } = req.params;
 
     if (!id || typeof id !== "string") {
-      return res.status(400).json({ error: "ID da categoria inválido" });
+      throw new AppError("ID da categoria inválido", 400);
     }
 
     await categoryService.delete(userId, id);
-    return res.status(204).json(ApiResponse.success(null, "Categoria deletada com sucesso"));
+    return res.status(204).send();
 
   }
 }

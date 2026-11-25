@@ -40,7 +40,7 @@ export class WalletController {
     const { id } = req.params;
 
     await walletService.delete(userId, String(id));
-    return res.status(204).json(ApiResponse.success(null));
+    return res.status(204).send();
   }
 
   async dashboard(req: Request, res: Response) {

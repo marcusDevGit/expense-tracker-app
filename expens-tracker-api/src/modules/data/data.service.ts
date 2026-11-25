@@ -10,7 +10,7 @@ export class DataService {
 
         if (expenses.length === 0) return "Data,Descrição,Valor,Categoria,Carteira\n";
 
-        const header = "Data,Descrição,Varlor,Categoria,Carteira\n";
+        const header = "Data,Descrição,Valor,Categoria,Carteira\n";
         const rows = expenses.map(exp => {
             return `${exp.expenseDate.toISOString()},"${exp.description}",${exp.amount},"${exp.category?.name || "Sem Categoria"}","${exp.wallet.name}"`;
         }).join("\n")

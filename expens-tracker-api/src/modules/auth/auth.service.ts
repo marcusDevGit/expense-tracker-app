@@ -103,7 +103,7 @@ export class AuthService {
     });
 
     if (!resetToken) {
-      throw new Error("Token invalido ou expirado");
+      throw new AppError("Token inválido ou expirado", 400);
     }
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
