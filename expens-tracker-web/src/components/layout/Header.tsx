@@ -16,7 +16,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         >
           <Menu size={20} />
         </Button>
-        <h2 className="text-lg font-semibold text-slate-700">
+        <h2 className="text-lg font-semibold text-foreground">
           Minhas Finanças
         </h2>
       </div>
@@ -35,8 +35,10 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
         </div>
 
         <Button
+          variant="ghost"
+          size="icon"
           onClick={logout}
-          className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+          className="text-muted-foreground hover:text-destructive transition-colors"
           title="Sair"
         >
           <LogOut size={20} />

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { authService } from "@/services/auth.service";
+import { ApiHttpError } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,11 +35,15 @@ export function Register() {
         description: "Agora você pode fazer login.",
       });
       navigate("/login");
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const description =
+        error instanceof ApiHttpError
+          ? error.response.data?.error || error.message
+          : "Ocorreu um erro inesperado";
       toast({
         variant: "destructive",
         title: "Erro ao criar conta",
-        description: error.message?.data?.error || "Ocorreu um erro inesperado",
+        description,
       });
     } finally {
       setIsLoading(false);
@@ -46,7 +51,7 @@ export function Register() {
   };
 
   return (
-    <div className="flex bg-muted min-h-screen items-center justify-center p-4">
+    <div className="flex bg-background min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg border-border">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
@@ -95,14 +100,14 @@ export function Register() {
               {isLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
-                "Cria Conta"
+                "Criar Conta"
               )}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            Já tem uma conta?
+            Já tem uma conta?{" "}
             <Link
               to="/login"
               className="text-primary font-semibold hover:underline"

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthStore } from "@/stores/auth.store";
 import { authService } from "@/services/auth.service";
+import { ApiHttpError } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
@@ -35,15 +36,18 @@ export function Login() {
 
       toast({
         title: "Bem-vindo!",
-        description: `Ola, ${data.user.name}! Login realizado com sucesso.`,
+        description: `Olá, ${data.user.name}! Login realizado com sucesso.`,
       });
       navigate("/");
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const description =
+        error instanceof ApiHttpError
+          ? error.response.data?.error || error.message
+          : "Ocorreu um erro inesperado";
       toast({
         variant: "destructive",
         title: "Erro ao fazer login",
-        description:
-          error.response?.data?.error || "Ocorreu um erro inesperado",
+        description,
       });
     } finally {
       setIsLoading(false);
@@ -51,7 +55,7 @@ export function Login() {
   };
 
   return (
-    <div className="flex bg-muted min-h-screen items-center justify-center p-4">
+    <div className="flex bg-background min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg border-border">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center text-foreground">
@@ -96,12 +100,12 @@ export function Login() {
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            Ainda não tem conta? ,
+            Ainda não tem conta?{" "}
             <Link
               to="/register"
               className="text-primary font-semibold hover:underline"
             >
-              Cadastra-se
+              Cadastre-se
             </Link>
           </p>
         </CardFooter>

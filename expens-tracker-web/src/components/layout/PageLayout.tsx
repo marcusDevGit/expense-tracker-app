@@ -26,7 +26,7 @@ export function PageLayout({ children }: { children: ReactNode }) {
 
       <div className="flex flex-1 flex-col min-w-0">
         <Header onMenuClick={() => setIsMobileMenuOpen(true)} />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 bg-muted">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 bg-background">
           {children}
         </main>
       </div>

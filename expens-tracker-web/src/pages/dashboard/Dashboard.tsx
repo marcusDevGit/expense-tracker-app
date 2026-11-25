@@ -14,7 +14,7 @@ import {
   AlertTriangle,
   CalendarDays,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   PieChart,
   Pie,
@@ -43,52 +43,49 @@ export function Dashboard() {
     queryFn: walletService.list,
   });
 
-  useEffect(() => {
-    if (wallets?.length && !selectedWalletId) {
-      const defaultId = user?.defaultWalletId || wallets[0].id;
-      setSelectedWalletId(defaultId);
-    }
-  }, [wallets, user?.defaultWalletId]);
+  const activeWalletId =
+    selectedWalletId || user?.defaultWalletId || wallets?.[0]?.id || "";
 
   const { data: stats } = useQuery({
-    queryKey: ["stats", selectedWalletId, month, year],
+    queryKey: ["stats", activeWalletId, month, year],
     queryFn: () =>
-      statsService.getDashboardStats(selectedWalletId!, month, year),
-    enabled: !!selectedWalletId,
+      statsService.getDashboardStats(activeWalletId, month, year),
+    enabled: !!activeWalletId,
   });
 
   const COLORS = [
-    "#0088FE",
-    "#00C49F",
-    "#FFBB28",
-    "#FF8042",
-    "#A020F0",
-    "#FF0000",
-    "#00FF00",
-    "#0000FF",
-    "#FFFF00",
-    "#FF00FF",
-    "#00FFFF",
-    "#FFFFFF",
+    "#136dec",
+    "#10b981",
+    "#f59e0b",
+    "#8b5cf6",
+    "#ec4899",
+    "#06b6d4",
+    "#f97316",
+    "#6366f1",
   ];
 
-  const currentWallet = wallets?.find((w) => w.id === selectedWalletId);
+  const currentWallet = wallets?.find((w) => w.id === activeWalletId);
 
   return (
     <PageLayout>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Dashboard</h1>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+          <h1 className="text-3xl font-extrabold tracking-tight">Dashboard</h1>
           <select
-            className="border rounded-md p-2 text-sm bg-background"
-            value={selectedWalletId}
+            className="border border-border rounded-lg px-3 py-2 text-sm bg-card text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-60"
+            value={activeWalletId}
+            disabled={!wallets?.length}
             onChange={(e) => setSelectedWalletId(e.target.value)}
           >
-            {wallets?.map((w) => (
-              <option key={w.id} value={w.id}>
-                {w.name}
-              </option>
-            ))}
+            {!wallets?.length ? (
+              <option value="">Nenhuma carteira cadastrada</option>
+            ) : (
+              wallets.map((w) => (
+                <option key={w.id} value={w.id}>
+                  {w.name}
+                </option>
+              ))
+            )}
           </select>
         </div>
 
@@ -233,7 +230,7 @@ export function Dashboard() {
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(v: any) => formatCurrency(Number(v) || 0)}
+                      formatter={(v: unknown) => formatCurrency(Number(v) || 0)}
                     />
                     <Legend verticalAlign="bottom" height={36} />
                   </PieChart>
@@ -273,10 +270,10 @@ export function Dashboard() {
                       axisLine={false}
                       tickLine={false}
                       tick={{ fontSize: 12 }}
-                      tickFormatter={(v: any) => `R$${v}`}
+                      tickFormatter={(v: number) => `R$${v}`}
                     />
                     <Tooltip
-                      formatter={(v: any) => formatCurrency(Number(v) || 0)}
+                      formatter={(v: unknown) => formatCurrency(Number(v) || 0)}
                       contentStyle={{
                         borderRadius: "8px",
                         border: "none",
