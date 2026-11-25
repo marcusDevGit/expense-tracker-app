@@ -2,13 +2,10 @@ node_modules
 /dist
 # Keep environment variables out of version control
 .env
-.env.example
 .env.docker
 .env.production
 .env.development
 .env.test
-.env.production.example
 backup.sql
-.agents/
 
 /generated/prisma

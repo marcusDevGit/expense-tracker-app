@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { UserController } from "./user.controller.js";
 import { authMiddleware } from "../auth/auth.middleware.js";
+import { validate } from "../../shared/middlewares/validate.js";
+import { registerSchema, updateProfileSchema } from "./user.validation.js";
 
 const router = Router();
 const userController = new UserController();
@@ -33,7 +35,7 @@ const userController = new UserController();
  *       201:
  *         description: Usuário criado com sucesso
  */
-router.post("/register", userController.register);
+router.post("/register", validate(registerSchema), userController.register);
 
 /**
  * @swagger
@@ -70,7 +72,7 @@ router.get("/profile", authMiddleware, userController.getProfile);
  *       200:
  *         description: Perfil atualizado
  */
-router.put("/profile", authMiddleware, userController.updateProfile);
+router.put("/profile", authMiddleware, validate(updateProfileSchema), userController.updateProfile);
 
 /**
  * @swagger

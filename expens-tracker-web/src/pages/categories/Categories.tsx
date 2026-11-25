@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { CreateCategoryModal } from "./CreateCategoryModal";
+import { CreateCategoryModal } from "./components/CreateCategoryModal";
 import { categoryService, type Category } from "@/services/category.service";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

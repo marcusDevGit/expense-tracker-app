@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CreateWalletModal } from "./CreateWalletModal";
+import { CreateWalletModal } from "./components/CreateWalletModal";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { walletService } from "@/services/wallet.service";

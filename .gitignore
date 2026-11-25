@@ -1,1 +1,6 @@
-expens-tracker-api/.agents
+expens-tracker-api/
+.idea
+.vite
+.vscode
+.env
+stitch*

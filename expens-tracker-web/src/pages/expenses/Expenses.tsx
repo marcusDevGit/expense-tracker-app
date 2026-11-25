@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { CreateExpenseModal } from "./CreateExpenseModal";
+import { CreateExpenseModal } from "./components/CreateExpenseModal";
 import { expenseService } from "@/services/expense.service";
 import { walletService } from "@/services/wallet.service";
 import { useFormatters } from "@/hooks/use-formatters";
