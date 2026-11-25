@@ -57,4 +57,80 @@ describe('UserService', () => {
             }
         });
     });
+
+    describe('findById', () => {
+        it('deve retornar os dados do usuário sem expor a senha', async () => {
+            const mockUser = {
+                id: 'user-1',
+                name: 'John Doe',
+                email: 'john@example.com',
+                defaultWalletId: null,
+                CreatedAt: new Date(),
+            };
+
+            prismaMock.user.findUnique.mockResolvedValue(mockUser as any);
+
+            const user = await userService.findById('user-1');
+
+            expect(user).toEqual(mockUser);
+            expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
+                where: { id: 'user-1' },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    defaultWalletId: true,
+                    CreatedAt: true,
+                },
+            });
+        });
+
+        it('deve lançar AppError 404 quando usuário não existir', async () => {
+            prismaMock.user.findUnique.mockResolvedValue(null);
+
+            await expect(userService.findById('missing-id')).rejects.toMatchObject({
+                statusCode: 404,
+                message: 'Usuário não encontrado!',
+            });
+        });
+    });
+
+    describe('delete', () => {
+        it('deve excluir usuário e dados dependentes em transação', async () => {
+            prismaMock.user.findUnique.mockResolvedValue({ id: 'user-1' } as any);
+            prismaMock.$transaction.mockResolvedValue([] as any);
+
+            await userService.delete('user-1');
+
+            expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+            expect(prismaMock.expense.deleteMany).toHaveBeenCalledWith({
+                where: { wallet: { userId: 'user-1' } },
+            });
+            expect(prismaMock.wallet.deleteMany).toHaveBeenCalledWith({
+                where: { userId: 'user-1' },
+            });
+            expect(prismaMock.category.deleteMany).toHaveBeenCalledWith({
+                where: { userId: 'user-1' },
+            });
+            expect(prismaMock.refreshToken.deleteMany).toHaveBeenCalledWith({
+                where: { userId: 'user-1' },
+            });
+            expect(prismaMock.passwordResetToken.deleteMany).toHaveBeenCalledWith({
+                where: { userId: 'user-1' },
+            });
+            expect(prismaMock.user.delete).toHaveBeenCalledWith({
+                where: { id: 'user-1' },
+            });
+        });
+
+        it('deve lançar AppError 404 ao tentar excluir usuário inexistente', async () => {
+            prismaMock.user.findUnique.mockResolvedValue(null);
+
+            await expect(userService.delete('missing-id')).rejects.toMatchObject({
+                statusCode: 404,
+                message: 'Usuário não encontrado!',
+            });
+            expect(prismaMock.$transaction).not.toHaveBeenCalled();
+        });
+    });
 });

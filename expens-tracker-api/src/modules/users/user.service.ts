@@ -16,7 +16,17 @@ export class UserService {
   }
 
   async findById(id: string) {
-    const user = await prisma.user.findUnique({ where: { id } });
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        defaultWalletId: true,
+        CreatedAt: true,
+      },
+    });
+    if (!user) throw new AppError("Usuário não encontrado!", 404);
     return user;
   }
 
@@ -47,5 +57,17 @@ export class UserService {
     })
   }
 
-  async delete(id: string) { }
+  async delete(id: string) {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) throw new AppError("Usuário não encontrado!", 404);
+
+    await prisma.$transaction([
+      prisma.expense.deleteMany({ where: { wallet: { userId: id } } }),
+      prisma.wallet.deleteMany({ where: { userId: id } }),
+      prisma.category.deleteMany({ where: { userId: id } }),
+      prisma.refreshToken.deleteMany({ where: { userId: id } }),
+      prisma.passwordResetToken.deleteMany({ where: { userId: id } }),
+      prisma.user.delete({ where: { id } }),
+    ]);
+  }
 }

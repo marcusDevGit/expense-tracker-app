@@ -15,7 +15,11 @@ export class UserController {
     )
   }
 
-  async getProfile(req: Request, res: Response) { }
+  async getProfile(req: Request, res: Response) {
+    const userId = req.userId!;
+    const user = await userService.findById(userId);
+    return res.json(ApiResponse.success(user));
+  }
 
   async updateProfile(req: Request, res: Response) {
     const userId = req.userId!;
@@ -36,5 +40,17 @@ export class UserController {
 
   }
 
-  async deleteProfile(req: Request, res: Response) { }
+  async deleteProfile(req: Request, res: Response) {
+    const userId = req.userId!;
+    await userService.delete(userId);
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+    });
+
+    return res.status(204).send();
+  }
 }
