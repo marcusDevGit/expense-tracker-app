@@ -1,6 +1,12 @@
 import { Router } from "express";
 import { authMiddleware } from "../auth/auth.middleware.js";
 import { CategoryController } from "./category.controller.js";
+import { validate } from "../../shared/middlewares/validate.js";
+import {
+  categoryIdParamSchema,
+  createCategorySchema,
+  updateCategorySchema,
+} from "./category.validation.js";
 
 const router = Router();
 const categoryController = new CategoryController();
@@ -36,7 +42,7 @@ router.use(authMiddleware);
  *       201:
  *         description: Categoria criada com sucesso
  */
-router.post("/", categoryController.create.bind(categoryController));
+router.post("/", validate(createCategorySchema), categoryController.create.bind(categoryController));
 
 /**
  * @swagger
@@ -70,7 +76,7 @@ router.get("/", categoryController.list.bind(categoryController));
  *       200:
  *         description: Categoria encontrada
  */
-router.get("/:id", categoryController.show.bind(categoryController));
+router.get("/:id", validate(categoryIdParamSchema, "params"), categoryController.show.bind(categoryController));
 
 /**
  * @swagger
@@ -99,7 +105,7 @@ router.get("/:id", categoryController.show.bind(categoryController));
  *       200:
  *         description: Categoria atualizada com sucesso
  */
-router.put("/:id", categoryController.update.bind(categoryController));
+router.put("/:id", validate(categoryIdParamSchema, "params"), validate(updateCategorySchema), categoryController.update.bind(categoryController));
 
 /**
  * @swagger
@@ -119,6 +125,6 @@ router.put("/:id", categoryController.update.bind(categoryController));
  *       200:
  *         description: Categoria deletada com sucesso
  */
-router.delete("/:id", categoryController.delete.bind(categoryController));
+router.delete("/:id", validate(categoryIdParamSchema, "params"), categoryController.delete.bind(categoryController));
 
 export default router;

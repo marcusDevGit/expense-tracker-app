@@ -1,6 +1,13 @@
 import { Router } from "express";
 import { authMiddleware } from "../auth/auth.middleware.js";
 import { ExpenseController } from "./expense.controller.js";
+import { validate } from "../../shared/middlewares/validate.js";
+import {
+  createExpenseSchema,
+  expenseIdParamSchema,
+  listExpensesQuerySchema,
+  updateExpenseSchema,
+} from "./expense.validation.js";
 
 const router = Router();
 const controller = new ExpenseController();
@@ -41,7 +48,7 @@ router.use(authMiddleware);
  *       201:
  *         description: Despesa criada com sucesso
  */
-router.post("/", controller.create.bind(controller));
+router.post("/", validate(createExpenseSchema), controller.create.bind(controller));
 
 /**
  * @swagger
@@ -74,7 +81,7 @@ router.post("/", controller.create.bind(controller));
  *       200:
  *         description: Lista filtrada e paginada de despesas
  */
-router.get("/", controller.list.bind(controller));
+router.get("/", validate(listExpensesQuerySchema, "query"), controller.list.bind(controller));
 
 /**
  * @swagger
@@ -94,7 +101,7 @@ router.get("/", controller.list.bind(controller));
  *       200:
  *         description: Despesa encontrada
  */
-router.get("/:id", controller.show.bind(controller));
+router.get("/:id", validate(expenseIdParamSchema, "params"), controller.show.bind(controller));
 
 /**
  * @swagger
@@ -129,7 +136,7 @@ router.get("/:id", controller.show.bind(controller));
  *       200:
  *         description: Despesa atualizada com sucesso
  */
-router.put("/:id", controller.update.bind(controller));
+router.put("/:id", validate(expenseIdParamSchema, "params"), validate(updateExpenseSchema), controller.update.bind(controller));
 
 /**
  * @swagger
@@ -149,6 +156,6 @@ router.put("/:id", controller.update.bind(controller));
  *       200:
  *         description: Despesa deletada com sucesso
  */
-router.delete("/:id", controller.delete.bind(controller));
+router.delete("/:id", validate(expenseIdParamSchema, "params"), controller.delete.bind(controller));
 
 export default router;

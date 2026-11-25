@@ -1,6 +1,13 @@
 import { Router } from "express";
 import { authMiddleware } from "../auth/auth.middleware.js";
 import { WalletController } from "./wallet.controller.js";
+import { validate } from "../../shared/middlewares/validate.js";
+import {
+  createWalletSchema,
+  updateWalletSchema,
+  walletDashboardQuerySchema,
+  walletIdParamSchema,
+} from "./wallet.validation.js";
 
 const router = Router();
 const walletController = new WalletController();
@@ -36,7 +43,7 @@ router.use(authMiddleware);
  *       201:
  *         description: Carteira criada com sucesso
  */
-router.post("/", walletController.create.bind(walletController));
+router.post("/", validate(createWalletSchema), walletController.create.bind(walletController));
 
 /**
  * @swagger
@@ -52,9 +59,9 @@ router.post("/", walletController.create.bind(walletController));
  */
 router.get("/", walletController.list.bind(walletController));
 
-router.get("/:id", walletController.show.bind(walletController));
-router.put("/:id", walletController.update.bind(walletController));
-router.delete("/:id", walletController.delete.bind(walletController));
+router.get("/:id", validate(walletIdParamSchema, "params"), walletController.show.bind(walletController));
+router.put("/:id", validate(walletIdParamSchema, "params"), validate(updateWalletSchema), walletController.update.bind(walletController));
+router.delete("/:id", validate(walletIdParamSchema, "params"), walletController.delete.bind(walletController));
 
 /**
  * @swagger
@@ -74,6 +81,6 @@ router.delete("/:id", walletController.delete.bind(walletController));
  *       200:
  *         description: Dashboard da carteira
  */
-router.get("/:id/dashboard", walletController.dashboard.bind(walletController));
+router.get("/:id/dashboard", validate(walletIdParamSchema, "params"), validate(walletDashboardQuerySchema, "query"), walletController.dashboard.bind(walletController));
 
 export default router;

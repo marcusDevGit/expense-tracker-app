@@ -1,5 +1,11 @@
 import { Router } from "express";
 import { AuthController } from "./auth.controller.js";
+import { validate } from "../../shared/middlewares/validate.js";
+import {
+  forgotPasswordSchema,
+  loginSchema,
+  resetPasswordSchema,
+} from "./auth.validation.js";
 
 const router = Router();
 const authcontroller = new AuthController();
@@ -33,7 +39,7 @@ const authcontroller = new AuthController();
  *       401:
  *         description: Credenciais inválidas
  */
-router.post("/login", authcontroller.login);
+router.post("/login", validate(loginSchema), authcontroller.login);
 
 /**
  * @swagger
@@ -78,7 +84,7 @@ router.post("/refresh", authcontroller.refresh);
  *       200:
  *         description: Link de recuperação de senha enviado com sucesso
  */
-router.post("/forgot-password", authcontroller.forgotPassword);
+router.post("/forgot-password", validate(forgotPasswordSchema), authcontroller.forgotPassword);
 
 /**
  * @swagger
@@ -100,6 +106,6 @@ router.post("/forgot-password", authcontroller.forgotPassword);
  *       200:
  *         description: Senha recuperação com sucesso
  */
-router.post("/reset-password", authcontroller.resetPassword);
+router.post("/reset-password", validate(resetPasswordSchema), authcontroller.resetPassword);
 
 export default router;
