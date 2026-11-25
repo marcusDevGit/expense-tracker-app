@@ -59,7 +59,7 @@ async function refreshAccessToken(): Promise<string | null> {
         const newToken: string | undefined =
           json?.data?.accessToken ?? json?.accessToken;
         if (newToken) {
-          localStorage.setItem("@expense:token", newToken);
+          useAuthStore.getState().setAccessToken(newToken);
           return newToken;
         }
         return null;

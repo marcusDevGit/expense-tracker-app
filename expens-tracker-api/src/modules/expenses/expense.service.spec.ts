@@ -67,6 +67,7 @@ describe('ExpenseService', () => {
         it('deve listar despesas do mês e processar recorrência', async () => {
             const userId = 'user-1';
 
+            prismaMock.wallet.findFirst.mockResolvedValue({ id: 'wallet-1', userId } as any);
             prismaMock.expense.findMany.mockResolvedValue([
                 { id: '1', amount: new Prisma.Decimal(10) }
             ] as any);
@@ -78,6 +79,16 @@ describe('ExpenseService', () => {
 
             expect(result.data).toHaveLength(1);
             expect(result.meta.total).toBe(1);
+            expect(prismaMock.wallet.findFirst).toHaveBeenCalledWith({
+                where: { id: 'wallet-1', userId },
+            });
+        });
+
+        it('deve lançar AppError se a carteira não pertencer ao usuário', async () => {
+            prismaMock.wallet.findFirst.mockResolvedValue(null);
+
+            await expect(expenseService.listByMonth('user-1', 'other-wallet', 10, 2024))
+                .rejects.toBeInstanceOf(AppError);
         });
     });
 });

@@ -42,6 +42,11 @@ export class ExpenseService {
     limit: number = 20,
     categoryId?: string,
   ) {
+    const wallet = await prisma.wallet.findFirst({
+      where: { id: walletId, userId },
+    });
+    if (!wallet) throw new AppError("Carteira inválida", 404);
+
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0, 23, 59, 59);
     await this.processRecurring(userId);
@@ -50,6 +55,7 @@ export class ExpenseService {
 
     const where: Prisma.ExpenseWhereInput = {
       walletId,
+      wallet: { userId },
       expenseDate: {
         gte: startDate,
         lte: endDate,

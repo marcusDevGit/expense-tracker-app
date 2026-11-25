@@ -13,6 +13,7 @@ interface AuthStore {
   accessToken: string | null;
   isAuthenticated: boolean;
   login: (user: User, accessToken: string) => void;
+  setAccessToken: (accessToken: string) => void;
   logout: () => void;
   updateUser: (user: Partial<User>) => void;
 }
@@ -26,6 +27,11 @@ export const useAuthStore = create<AuthStore>()(
     login: (user, accessToken) => {
       localStorage.setItem("@expense:token", accessToken);
       set({ user, accessToken, isAuthenticated: true });
+    },
+
+    setAccessToken: (accessToken) => {
+      localStorage.setItem("@expense:token", accessToken);
+      set({ accessToken });
     },
 
     logout: () => {

@@ -32,10 +32,14 @@ export class AuthController {
 
     await authService.logout(refreshToken);
 
-    res.clearCookie("refreshToken");
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+    });
 
-    return res.status(204).json(ApiResponse.success(null, "Logout realizado com sucesso"));
-
+    return res.status(204).send();
   }
   async forgotPassword(req: Request, res: Response) {
     await authService.forgotPassword(req.body.email);

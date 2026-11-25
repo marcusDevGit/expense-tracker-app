@@ -40,18 +40,24 @@ export class AuthService {
   }
   async refresh(refreshToken: string) {
     if (!refreshToken) {
-      throw new Error("Refresh token invalido");
+      throw new AppError("Refresh token inválido", 401);
     }
-    const payload = jwt.verify(
-      refreshToken,
-      jwtRefreshToken.secret,
-    ) as JwtPayload;
+
+    let payload: JwtPayload;
+    try {
+      payload = jwt.verify(
+        refreshToken,
+        jwtRefreshToken.secret,
+      ) as JwtPayload;
+    } catch {
+      throw new AppError("Refresh token inválido ou expirado", 401);
+    }
 
     const tokenExists = await prisma.refreshToken.findUnique({
       where: { token: refreshToken },
     });
-    if (!tokenExists) {
-      throw new Error("Refresh token invalido");
+    if (!tokenExists || tokenExists.expiresAt < new Date()) {
+      throw new AppError("Refresh token inválido ou expirado", 401);
     }
 
     const newAccessToken = jwt.sign({ sub: payload.sub }, jwtConfig.secret, {
