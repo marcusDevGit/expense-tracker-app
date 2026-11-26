@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { CreateExpenseModal } from "./components/CreateExpenseModal";
-import { expenseService } from "@/services/expense.service";
+import { expenseService, type Expense } from "@/services/expense.service";
 import { walletService } from "@/services/wallet.service";
 import { useFormatters } from "@/hooks/use-formatters";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import {
   Calendar as CalendarIcon,
   Tag,
   Search,
+  Copy,
 } from "lucide-react";
 import { categoryService } from "@/services/category.service";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,9 @@ import { Input } from "@/components/ui/input";
 export function Expenses() {
   const { formatCurrency, formatDate } = useFormatters();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [expenseToDuplicate, setExpenseToDuplicate] = useState<Expense | null>(
+    null,
+  );
 
   const now = new Date();
   const [month, setMonth] = useState(now.getMonth() + 1);
@@ -40,16 +44,12 @@ export function Expenses() {
     queryFn: categoryService.list,
   });
 
-  useEffect(() => {
-    if (wallets && wallets.length > 0 && !selectedWalletId) {
-      setSelectedWalletId(wallets[0].id);
-    }
-  }, [wallets, selectedWalletId]);
+  const activeWalletId = selectedWalletId || wallets?.[0]?.id || "";
 
   const { data: expensesResponse, isLoading } = useQuery({
     queryKey: [
       "expenses",
-      selectedWalletId,
+      activeWalletId,
       month,
       year,
       page,
@@ -57,7 +57,7 @@ export function Expenses() {
     ],
     queryFn: () =>
       expenseService.list({
-        walletId: selectedWalletId!,
+        walletId: activeWalletId,
         month,
         year,
         page,
@@ -65,7 +65,7 @@ export function Expenses() {
         categoryId:
           selectedCategoryId === "all" ? undefined : selectedCategoryId,
       }),
-    enabled: !!selectedWalletId,
+    enabled: !!activeWalletId,
   });
 
   const expenses = expensesResponse?.data;
@@ -94,7 +94,13 @@ export function Expenses() {
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Despesas
           </h1>
-          <Button className="gap-2" onClick={() => setIsModalOpen(true)}>
+          <Button
+            className="gap-2"
+            onClick={() => {
+              setExpenseToDuplicate(null);
+              setIsModalOpen(true);
+            }}
+          >
             <Plus size={18} /> Nova Despesa
           </Button>
         </div>
@@ -105,7 +111,7 @@ export function Expenses() {
             </Label>
             <select
               className="w-full border rounded-md p-2 text-sm bg-background text-foreground"
-              value={selectedWalletId}
+              value={activeWalletId}
               onChange={(e) => setSelectedWalletId(e.target.value)}
             >
               {wallets?.map((w) => (
@@ -227,8 +233,22 @@ export function Expenses() {
                           </div>
                         </div>
                       </div>
-                      <div className="text-lg font-bold text-red-600">
-                        - {formatCurrency(expense.amount)}
+                      <div className="flex items-center gap-3">
+                        <div className="text-lg font-bold text-red-600">
+                          - {formatCurrency(expense.amount)}
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Duplicar despesa"
+                          aria-label={`Duplicar ${expense.description}`}
+                          onClick={() => {
+                            setExpenseToDuplicate(expense);
+                            setIsModalOpen(true);
+                          }}
+                        >
+                          <Copy size={16} />
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -261,8 +281,13 @@ export function Expenses() {
         </div>
       </div>
       <CreateExpenseModal
+        key={expenseToDuplicate?.id ?? (isModalOpen ? "new" : "closed")}
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setExpenseToDuplicate(null);
+        }}
+        initialData={expenseToDuplicate}
       />
     </PageLayout>
   );

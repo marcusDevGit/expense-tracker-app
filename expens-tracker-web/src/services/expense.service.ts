@@ -11,6 +11,7 @@ export interface Expense {
     category: { name: string, color: string | null }
     isRecurring?: boolean
     recurrenceType?: "WEEKLY" | "MONTHLY" | "YEARLY"
+    paymentMethod?: string
 }
 export interface PaginatedResponse<T> {
     data: T[]
@@ -37,7 +38,7 @@ export const expenseService = {
         newCategoryName?: string
         isRecurring?: boolean
         recurrenceType?: "WEEKLY" | "MONTHLY" | "YEARLY"
-        paymentMethod?: any
+        paymentMethod?: string
         installments: number
     }) {
         const response = await api.post<Expense>("expenses", data)

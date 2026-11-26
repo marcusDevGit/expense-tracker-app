@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { expenseService } from "@/services/expense.service";
+import { expenseService, type Expense } from "@/services/expense.service";
+import { ApiHttpError } from "@/services/api";
 import { walletService } from "@/services/wallet.service";
 import { categoryService } from "@/services/category.service";
 import { Button } from "@/components/ui/button";
@@ -15,23 +16,32 @@ import { useFormatters } from "@/hooks/use-formatters";
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  initialData?: Expense | null;
 }
 
-export function CreateExpenseModal({ isOpen, onClose }: Props) {
+export function CreateExpenseModal({ isOpen, onClose, initialData }: Props) {
   const { formatCurrency } = useFormatters();
-  const [isRecurring, setIsRecurring] = useState(false);
+  const [isRecurring, setIsRecurring] = useState(
+    initialData?.isRecurring ?? false,
+  );
   const [recurrenceType, setRecurrenceType] = useState<
     "WEEKLY" | "MONTHLY" | "YEARLY"
-  >("MONTHLY");
-  const [paymentMethod, setPaymentMethod] = useState<string>("CASH");
+  >(initialData?.recurrenceType ?? "MONTHLY");
+  const [paymentMethod, setPaymentMethod] = useState<string>(
+    initialData?.paymentMethod ?? "CASH",
+  );
   const [installments, setInstallments] = useState(1);
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
+  const [description, setDescription] = useState(
+    initialData?.description ?? "",
+  );
+  const [amount, setAmount] = useState(
+    initialData?.amount !== undefined ? String(initialData.amount) : "",
+  );
   const [expenseDate, setExpenseDate] = useState(
     new Date().toISOString().split("T")[0],
   );
-  const [walletId, setWalletId] = useState("");
-  const [categoryId, setCategoryId] = useState("");
+  const [walletId, setWalletId] = useState(initialData?.walletId ?? "");
+  const [categoryId, setCategoryId] = useState(initialData?.categoryId ?? "");
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
 
@@ -47,28 +57,24 @@ export function CreateExpenseModal({ isOpen, onClose }: Props) {
     queryFn: categoryService.list,
   });
 
-  useEffect(() => {
-    if (wallets && wallets.length > 0 && !walletId) {
-      setWalletId(wallets[0].id);
-    }
-  }, [wallets, walletId]);
+  const activeWalletId = walletId || wallets?.[0]?.id || "";
 
   const selectedDate = new Date(expenseDate);
   const { data: stats } = useQuery({
     queryKey: [
       "stats",
       "dashboard",
-      walletId,
+      activeWalletId,
       selectedDate.getMonth() + 1,
       selectedDate.getFullYear(),
     ],
     queryFn: () =>
       statsService.getDashboardStats(
-        walletId,
+        activeWalletId,
         selectedDate.getMonth() + 1,
         selectedDate.getFullYear(),
       ),
-    enabled: !!walletId && !!categoryId && categoryId !== "NEW",
+    enabled: !!activeWalletId && !!categoryId && categoryId !== "NEW",
   });
 
   const selectedCategory = categories?.find((c) => c.id === categoryId);
@@ -87,8 +93,22 @@ export function CreateExpenseModal({ isOpen, onClose }: Props) {
       queryClient.invalidateQueries({ queryKey: ["expenses"] });
       queryClient.invalidateQueries({ queryKey: ["wallets"] });
       queryClient.invalidateQueries({ queryKey: ["stats"] });
-      toast({ title: "Sucesso", description: "Despesa criada" });
+      toast({
+        title: "Sucesso",
+        description: initialData ? "Despesa duplicada" : "Despesa criada",
+      });
       onClose();
+    },
+    onError: (error: unknown) => {
+      const message =
+        error instanceof ApiHttpError
+          ? error.response.data?.error || error.message
+          : "Não foi possível salvar a despesa";
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: message,
+      });
     },
   });
   if (!isOpen) return null;
@@ -97,7 +117,9 @@ export function CreateExpenseModal({ isOpen, onClose }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="w-full max-w-md bg-card rounded-xl shadow-2xl p-6 animate-in zoom-in duration-200">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold">Nova Despesa</h2>
+          <h2 className="text-xl font-bold">
+            {initialData ? "Duplicar Despesa" : "Nova Despesa"}
+          </h2>
           <Button variant="ghost" onClick={onClose}>
             <X size={20} />
           </Button>
@@ -109,12 +131,12 @@ export function CreateExpenseModal({ isOpen, onClose }: Props) {
               description,
               amount: Number(amount),
               expenseDate,
-              walletId,
+              walletId: activeWalletId,
               categoryId: categoryId || undefined,
               newCategoryName: newCategoryName || undefined,
               isRecurring,
               recurrenceType: isRecurring ? recurrenceType : undefined,
-              paymentMethod: paymentMethod as any,
+              paymentMethod,
               installments: Number(installments),
             });
           }}
@@ -162,7 +184,7 @@ export function CreateExpenseModal({ isOpen, onClose }: Props) {
             <Label>Carteira</Label>
             <select
               className="w-full border rounded-md p-2"
-              value={walletId}
+              value={activeWalletId}
               onChange={(e) => setWalletId(e.target.value)}
               required
             >
@@ -221,7 +243,11 @@ export function CreateExpenseModal({ isOpen, onClose }: Props) {
               <select
                 className="w-full border rounded-md p-2"
                 value={recurrenceType}
-                onChange={(e) => setRecurrenceType(e.target.value as any)}
+                onChange={(e) =>
+                  setRecurrenceType(
+                    e.target.value as "WEEKLY" | "MONTHLY" | "YEARLY",
+                  )
+                }
               >
                 <option value="WEEKLY">Semanal</option>
                 <option value="MONTHLY">Mensal</option>
