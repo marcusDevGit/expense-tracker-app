@@ -4,6 +4,7 @@ import { prisma } from "../../config/database.js";
 import { jwtConfig, jwtRefreshToken } from "../../config/jwt.js";
 import crypto from "node:crypto";
 import { AppError } from "../../shared/errors/AppError.js";
+import { logger } from "../../shared/utils/logger.js";
 
 export class AuthService {
   async authenticate({ email, password }: any) {
@@ -87,7 +88,10 @@ export class AuthService {
     });
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
 
-    console.log(resetLink);
+    logger.debug("Password reset link generated", {
+      userId: user.id,
+      resetLink,
+    });
   }
 
   async resetPassword(token: string, newPassword: string) {

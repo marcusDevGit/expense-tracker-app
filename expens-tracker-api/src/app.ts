@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import router from "./routes/index.js";
 import "dotenv/config";
 import { errorHandler } from "./shared/middlewares/errorHandler.js";
+import { requestLogger } from "./shared/middlewares/requestLogger.js";
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from "./config/swagger.js";
 
@@ -17,6 +18,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(requestLogger);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/v1", router);

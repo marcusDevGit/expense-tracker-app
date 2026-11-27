@@ -10,10 +10,12 @@ export class AuthController {
     const { user, accessToken, refreshToken } =
       await authService.authenticate({ email, password });
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "strict",
       path: "/",
     });
 
@@ -32,10 +34,12 @@ export class AuthController {
 
     await authService.logout(refreshToken);
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     res.clearCookie("refreshToken", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "strict",
       path: "/",
     });
 

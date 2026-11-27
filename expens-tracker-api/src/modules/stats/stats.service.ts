@@ -1,5 +1,6 @@
 import { prisma } from "../../config/database.js";
 import { ExpenseService } from "../expenses/expense.service.js";
+import { logger } from "../../shared/utils/logger.js";
 
 const expenseService = new ExpenseService();
 
@@ -18,10 +19,12 @@ export class StatsService {
             include: { category: true }
         });
 
-        console.log(`Found ${expenses.length} expenses for stats`);
-        if (expenses.length > 0) {
-            console.log("First expense category:", expenses[0].category);
-        }
+        logger.debug("Loaded expenses for dashboard stats", {
+            walletId,
+            month,
+            year,
+            count: expenses.length,
+        });
 
         const now = new Date();
         const isCurrentMonth = now.getMonth() + 1 === month && now.getFullYear() === year;
@@ -84,7 +87,13 @@ export class StatsService {
             }
         });
 
-        console.log("Stats generated successfully", { totalExpense, predictedTotal, nextMonthTotal, breakdownCount: categoryBreakdown.length });
+        logger.debug("Dashboard stats generated", {
+            walletId,
+            totalExpense,
+            predictedTotal,
+            nextMonthTotal,
+            breakdownCount: categoryBreakdown.length,
+        });
 
         return {
             month: {
