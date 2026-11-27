@@ -53,6 +53,14 @@ export function Dashboard() {
     enabled: !!activeWalletId,
   });
 
+  const CHART_TOOLTIP_STYLE = {
+    backgroundColor: "hsl(var(--card))",
+    borderColor: "hsl(var(--border))",
+    borderRadius: "8px",
+    color: "hsl(var(--foreground))",
+    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.15)",
+  };
+
   const COLORS = [
     "#136dec",
     "#10b981",
@@ -231,6 +239,8 @@ export function Dashboard() {
                     </Pie>
                     <Tooltip
                       formatter={(v: unknown) => formatCurrency(Number(v) || 0)}
+                      contentStyle={CHART_TOOLTIP_STYLE}
+                      itemStyle={{ color: "hsl(var(--foreground))" }}
                     />
                     <Legend verticalAlign="bottom" height={36} />
                   </PieChart>
@@ -258,7 +268,7 @@ export function Dashboard() {
                     <CartesianGrid
                       strokeDasharray="3 3"
                       vertical={false}
-                      stroke="#f1f5f9"
+                      stroke="hsl(var(--border))"
                     />
                     <XAxis
                       dataKey="name"
@@ -273,12 +283,11 @@ export function Dashboard() {
                       tickFormatter={(v: number) => `R$${v}`}
                     />
                     <Tooltip
+                      cursor={{ fill: "hsl(var(--muted) / 0.35)" }}
                       formatter={(v: unknown) => formatCurrency(Number(v) || 0)}
-                      contentStyle={{
-                        borderRadius: "8px",
-                        border: "none",
-                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                      }}
+                      contentStyle={CHART_TOOLTIP_STYLE}
+                      itemStyle={{ color: "hsl(var(--foreground))" }}
+                      labelStyle={{ color: "hsl(var(--foreground))" }}
                     />
                     <Bar
                       dataKey="total"

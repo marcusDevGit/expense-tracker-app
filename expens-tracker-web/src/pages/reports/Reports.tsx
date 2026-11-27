@@ -10,7 +10,7 @@ import {
   ArrowDownRight,
   PieChart as PieChartIcon,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   LineChart,
   Line,
@@ -37,29 +37,25 @@ export function Reports() {
     queryFn: walletService.list,
   });
 
-  useEffect(() => {
-    if (wallets?.length && !selectedWalletId) {
-      setSelectedWalletId(wallets[0].id);
-    }
-  }, [wallets, selectedWalletId]);
+  const activeWalletId = selectedWalletId || wallets?.[0]?.id || "";
 
   const { data: trends } = useQuery({
-    queryKey: ["stats", "trends", selectedWalletId],
-    queryFn: () => statsService.getTrends(selectedWalletId!),
-    enabled: !!selectedWalletId,
+    queryKey: ["stats", "trends", activeWalletId],
+    queryFn: () => statsService.getTrends(activeWalletId),
+    enabled: !!activeWalletId,
   });
 
   const { data: comparison } = useQuery({
-    queryKey: ["stats", "comparison", selectedWalletId, month, year],
-    queryFn: () => statsService.getComparison(selectedWalletId!, month, year),
-    enabled: !!selectedWalletId,
+    queryKey: ["stats", "comparison", activeWalletId, month, year],
+    queryFn: () => statsService.getComparison(activeWalletId, month, year),
+    enabled: !!activeWalletId,
   });
 
   const { data: dashboardStats } = useQuery({
-    queryKey: ["stats", "dashboard", selectedWalletId, month, year],
+    queryKey: ["stats", "dashboard", activeWalletId, month, year],
     queryFn: () =>
-      statsService.getDashboardStats(selectedWalletId!, month, year),
-    enabled: !!selectedWalletId,
+      statsService.getDashboardStats(activeWalletId, month, year),
+    enabled: !!activeWalletId,
   });
 
   const COLORS = [
@@ -77,8 +73,8 @@ export function Reports() {
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Relatórios</h1>
           <select
-            className="border rounded-md p-2 text-sm bg-card"
-            value={selectedWalletId}
+            className="border border-border rounded-lg px-3 py-2 text-sm bg-card text-foreground"
+            value={activeWalletId}
             onChange={(e) => setSelectedWalletId(e.target.value)}
           >
             {wallets?.map((w) => (
@@ -140,7 +136,7 @@ export function Reports() {
                   <CartesianGrid
                     strokeDasharray="3 3"
                     vertical={false}
-                    stroke="#f1f5f9"
+                    stroke="hsl(var(--border))"
                   />
                   <XAxis
                     dataKey="month"
@@ -152,10 +148,18 @@ export function Reports() {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fontSize: 12 }}
-                    tickFormatter={(v: any) => `R$${v}`}
+                    tickFormatter={(v: number) => `R$${v}`}
                   />
                   <Tooltip
-                    formatter={(v: any) => formatCurrency(Number(v) || 0)}
+                    formatter={(v: unknown) => formatCurrency(Number(v) || 0)}
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      borderColor: "hsl(var(--border))",
+                      borderRadius: "8px",
+                      color: "hsl(var(--foreground))",
+                    }}
+                    itemStyle={{ color: "hsl(var(--foreground))" }}
+                    labelStyle={{ color: "hsl(var(--foreground))" }}
                   />
                   <Line
                     type="monotone"
@@ -194,7 +198,14 @@ export function Reports() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(v: any) => formatCurrency(Number(v) || 0)}
+                    formatter={(v: unknown) => formatCurrency(Number(v) || 0)}
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      borderColor: "hsl(var(--border))",
+                      borderRadius: "8px",
+                      color: "hsl(var(--foreground))",
+                    }}
+                    itemStyle={{ color: "hsl(var(--foreground))" }}
                   />
                   <Legend />
                 </PieChart>
