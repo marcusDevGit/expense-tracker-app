@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { expenseService, type Expense } from "@/services/expense.service";
+import {
+  expenseService,
+  type Expense,
+  type ExpenseSuggestion,
+} from "@/services/expense.service";
 import { ApiHttpError } from "@/services/api";
 import { walletService } from "@/services/wallet.service";
 import { categoryService } from "@/services/category.service";
@@ -58,6 +62,32 @@ export function CreateExpenseModal({ isOpen, onClose, initialData }: Props) {
   });
 
   const activeWalletId = walletId || wallets?.[0]?.id || "";
+
+  const { data: suggestions } = useQuery({
+    queryKey: ["expense-suggestions", description],
+    queryFn: () =>
+      expenseService.suggestions({
+        q: description.trim() || undefined,
+        limit: 5,
+      }),
+    enabled: isOpen && !initialData,
+  });
+
+  const handleApplySuggestion = (suggestion: ExpenseSuggestion) => {
+    setDescription(suggestion.description);
+    setAmount(String(suggestion.amount));
+    if (suggestion.walletId) {
+      setWalletId(suggestion.walletId);
+    }
+    if (suggestion.categoryId) {
+      setIsCreatingCategory(false);
+      setNewCategoryName("");
+      setCategoryId(suggestion.categoryId);
+    }
+    if (suggestion.paymentMethod) {
+      setPaymentMethod(suggestion.paymentMethod);
+    }
+  };
 
   const selectedDate = new Date(expenseDate);
   const { data: stats } = useQuery({
@@ -149,6 +179,35 @@ export function CreateExpenseModal({ isOpen, onClose, initialData }: Props) {
               onChange={(e) => setDescription(e.target.value)}
               required
             />
+            {!initialData && suggestions && suggestions.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-[11px] font-medium text-muted-foreground">
+                  Sugestões do histórico
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {suggestions.map((suggestion) => (
+                    <button
+                      key={`${suggestion.description}-${suggestion.walletId}`}
+                      type="button"
+                      onClick={() => handleApplySuggestion(suggestion)}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/60 px-2.5 py-1 text-xs text-foreground hover:bg-primary/10 hover:border-primary/40 transition-colors"
+                    >
+                      <span className="font-medium">
+                        {suggestion.description}
+                      </span>
+                      {suggestion.categoryName && (
+                        <span className="text-muted-foreground">
+                          · {suggestion.categoryName}
+                        </span>
+                      )}
+                      <span className="text-primary font-semibold">
+                        · {formatCurrency(suggestion.amount)}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-2">

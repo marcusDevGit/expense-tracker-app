@@ -80,6 +80,75 @@ export class ExpenseService {
     ]);
     return { data: expenses, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } }
   }
+
+  async getSuggestions(userId: string, q?: string, limit: number = 5) {
+    const trimmedQuery = q?.trim();
+    const recentExpenses = await prisma.expense.findMany({
+      where: {
+        wallet: { userId },
+        ...(trimmedQuery
+          ? { description: { contains: trimmedQuery, mode: "insensitive" } }
+          : {}),
+      },
+      select: {
+        description: true,
+        amount: true,
+        walletId: true,
+        categoryId: true,
+        paymentMethod: true,
+        expenseDate: true,
+        category: {
+          select: { name: true },
+        },
+      },
+      orderBy: { expenseDate: "desc" },
+      take: 50,
+    });
+
+    const grouped = new Map<
+      string,
+      {
+        description: string;
+        amount: number;
+        walletId: string;
+        categoryId: string | null;
+        categoryName: string | null;
+        paymentMethod: string;
+        count: number;
+        lastUsedAt: Date;
+      }
+    >();
+
+    for (const exp of recentExpenses) {
+      const key = exp.description.trim().toLowerCase();
+      if (!key) continue;
+
+      const existing = grouped.get(key);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        grouped.set(key, {
+          description: exp.description.trim(),
+          amount: Number(exp.amount),
+          walletId: exp.walletId,
+          categoryId: exp.categoryId,
+          categoryName: exp.category?.name ?? null,
+          paymentMethod: exp.paymentMethod,
+          count: 1,
+          lastUsedAt: exp.expenseDate,
+        });
+      }
+    }
+
+    return Array.from(grouped.values())
+      .sort(
+        (a, b) =>
+          b.count - a.count ||
+          b.lastUsedAt.getTime() - a.lastUsedAt.getTime(),
+      )
+      .slice(0, limit)
+      .map(({ lastUsedAt: _lastUsedAt, ...suggestion }) => suggestion);
+  }
   async findById(userId: string, expenseId: string) {
     const expense = await prisma.expense.findFirst({
       where: {

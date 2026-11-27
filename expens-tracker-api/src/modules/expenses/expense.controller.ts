@@ -36,6 +36,20 @@ export class ExpenseController {
 
     return res.json(ApiResponse.success(expenses));
   }
+
+  async suggestions(req: Request, res: Response) {
+    const userId = req.userId!;
+    const { q, limit } = req.query;
+
+    const suggestions = await expenseService.getSuggestions(
+      userId,
+      q ? String(q) : undefined,
+      limit ? Number(limit) : 5,
+    );
+
+    return res.json(ApiResponse.success(suggestions));
+  }
+
   async show(req: Request, res: Response) {
     const userId = req.userId!;
     const { id } = req.params;

@@ -5,6 +5,7 @@ import { validate } from "../../shared/middlewares/validate.js";
 import {
   createExpenseSchema,
   expenseIdParamSchema,
+  expenseSuggestionsQuerySchema,
   listExpensesQuerySchema,
   updateExpenseSchema,
 } from "./expense.validation.js";
@@ -82,6 +83,27 @@ router.post("/", validate(createExpenseSchema), controller.create.bind(controlle
  *         description: Lista filtrada e paginada de despesas
  */
 router.get("/", validate(listExpensesQuerySchema, "query"), controller.list.bind(controller));
+
+/**
+ * @swagger
+ * /expenses/suggestions:
+ *   get:
+ *     summary: Retorna sugestões de despesas baseadas no histórico do usuário
+ *     tags: [Expenses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         schema: { type: string }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, default: 5 }
+ *     responses:
+ *       200:
+ *         description: Lista de sugestões ordenadas por frequência e recência
+ */
+router.get("/suggestions", validate(expenseSuggestionsQuerySchema, "query"), controller.suggestions.bind(controller));
 
 /**
  * @swagger

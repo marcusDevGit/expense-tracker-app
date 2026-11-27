@@ -49,3 +49,8 @@ export const listExpensesQuerySchema = z.object({
 export const expenseIdParamSchema = z.object({
   id: z.string().min(1, "ID da despesa inválido"),
 });
+
+export const expenseSuggestionsQuerySchema = z.object({
+  q: z.string().trim().optional(),
+  limit: z.coerce.number().int().min(1).max(10).optional(),
+});

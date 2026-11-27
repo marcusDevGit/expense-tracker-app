@@ -91,4 +91,92 @@ describe('ExpenseService', () => {
                 .rejects.toBeInstanceOf(AppError);
         });
     });
+
+    describe('getSuggestions', () => {
+        it('deve agrupar por descrição e ordenar por frequência e recência', async () => {
+            const older = new Date('2026-10-01T10:00:00Z');
+            const newer = new Date('2026-10-15T10:00:00Z');
+
+            prismaMock.expense.findMany.mockResolvedValue([
+                {
+                    description: 'Uber',
+                    amount: new Prisma.Decimal(25),
+                    walletId: 'wallet-1',
+                    categoryId: 'cat-transport',
+                    paymentMethod: 'CREDIT_CARD',
+                    expenseDate: newer,
+                    category: { name: 'Transporte' },
+                },
+                {
+                    description: 'uber',
+                    amount: new Prisma.Decimal(20),
+                    walletId: 'wallet-1',
+                    categoryId: 'cat-transport',
+                    paymentMethod: 'CREDIT_CARD',
+                    expenseDate: older,
+                    category: { name: 'Transporte' },
+                },
+                {
+                    description: 'Netflix',
+                    amount: new Prisma.Decimal(55.9),
+                    walletId: 'wallet-1',
+                    categoryId: 'cat-sub',
+                    paymentMethod: 'CREDIT_CARD',
+                    expenseDate: newer,
+                    category: { name: 'Assinaturas' },
+                },
+            ] as any);
+
+            const suggestions = await expenseService.getSuggestions('user-1', undefined, 5);
+
+            expect(suggestions).toHaveLength(2);
+            expect(suggestions[0]).toMatchObject({
+                description: 'Uber',
+                amount: 25,
+                categoryName: 'Transporte',
+                count: 2,
+            });
+            expect(suggestions[1]).toMatchObject({
+                description: 'Netflix',
+                amount: 55.9,
+                count: 1,
+            });
+        });
+
+        it('deve filtrar por texto e respeitar o limite informado', async () => {
+            prismaMock.expense.findMany.mockResolvedValue([
+                {
+                    description: 'Uber Casa',
+                    amount: new Prisma.Decimal(18),
+                    walletId: 'wallet-1',
+                    categoryId: null,
+                    paymentMethod: 'PIX',
+                    expenseDate: new Date('2026-10-15T10:00:00Z'),
+                    category: null,
+                },
+                {
+                    description: 'Uber Trabalho',
+                    amount: new Prisma.Decimal(22),
+                    walletId: 'wallet-1',
+                    categoryId: null,
+                    paymentMethod: 'PIX',
+                    expenseDate: new Date('2026-10-14T10:00:00Z'),
+                    category: null,
+                },
+            ] as any);
+
+            const suggestions = await expenseService.getSuggestions('user-1', 'uber', 1);
+
+            expect(prismaMock.expense.findMany).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    where: {
+                        wallet: { userId: 'user-1' },
+                        description: { contains: 'uber', mode: 'insensitive' },
+                    },
+                }),
+            );
+            expect(suggestions).toHaveLength(1);
+            expect(suggestions[0].description).toBe('Uber Casa');
+        });
+    });
 });

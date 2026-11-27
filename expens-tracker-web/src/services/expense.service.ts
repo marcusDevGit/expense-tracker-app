@@ -13,6 +13,16 @@ export interface Expense {
     recurrenceType?: "WEEKLY" | "MONTHLY" | "YEARLY"
     paymentMethod?: string
 }
+export interface ExpenseSuggestion {
+    description: string
+    amount: number
+    walletId: string
+    categoryId: string | null
+    categoryName: string | null
+    paymentMethod: string
+    count: number
+}
+
 export interface PaginatedResponse<T> {
     data: T[]
     meta: {
@@ -26,6 +36,11 @@ export interface PaginatedResponse<T> {
 export const expenseService = {
     async list(params?: { walletId?: string; month?: number; year?: number; page?: number; limit?: number; categoryId?: string }) {
         const response = await api.get<PaginatedResponse<Expense>>("expenses", { params })
+        return response.data
+    },
+
+    async suggestions(params?: { q?: string; limit?: number }) {
+        const response = await api.get<ExpenseSuggestion[]>("expenses/suggestions", { params })
         return response.data
     },
 
