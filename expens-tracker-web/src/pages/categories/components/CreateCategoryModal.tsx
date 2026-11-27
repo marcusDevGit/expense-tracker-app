@@ -14,10 +14,12 @@ interface Props {
 }
 
 export function CreateCategoryModal({ isOpen, onClose, category }: Props) {
-  const [name, setName] = useState("");
-  const [budget, setBudget] = useState("");
-  const [color, setColor] = useState("#6366f1");
-  const [icon, setIcon] = useState("🏷️");
+  const [name, setName] = useState(category?.name ?? "");
+  const [budget, setBudget] = useState(
+    category?.budget ? String(category.budget) : "",
+  );
+  const [color, setColor] = useState(category?.color || "#6366f1");
+  const [icon, setIcon] = useState(category?.icon || "🏷️");
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -65,20 +67,6 @@ export function CreateCategoryModal({ isOpen, onClose, category }: Props) {
     "🥁",
   ];
 
-  useEffect(() => {
-    if (category) {
-      setName(category.name);
-      setBudget(category.budget ? String(category.budget) : "");
-      setColor(category.color || "#6366f1");
-      setIcon(category.icon || "🏷️");
-    } else {
-      setName("");
-      setBudget("");
-      setColor("#6366f1");
-      setIcon("🏷️");
-    }
-  }, [category, isOpen]);
-
   const mutation = useMutation({
     mutationFn: (data: {
       name: string;
@@ -101,17 +89,31 @@ export function CreateCategoryModal({ isOpen, onClose, category }: Props) {
       onClose();
     },
   });
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md bg-card rounded-xl p-6 shadow-2xl animate-in zoom-in duration-200">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="w-full max-w-md max-h-[92vh] overflow-y-auto bg-card border border-border rounded-xl p-5 shadow-2xl animate-in zoom-in duration-200">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-bold">
             {category ? "Editar Categoria" : "Nova Categoria"}
           </h2>
-          <Button variant="ghost" onClick={onClose} size="icon">
-            <X size={20} />
+          <Button type="button" variant="ghost" onClick={onClose} size="icon">
+            <X size={18} />
           </Button>
         </div>
         <form
@@ -119,7 +121,7 @@ export function CreateCategoryModal({ isOpen, onClose, category }: Props) {
             e.preventDefault();
             mutation.mutate({ name, color, icon, budget: Number(budget) });
           }}
-          className="space-y-4"
+          className="space-y-3"
         >
           <div className="space-y-2">
             <Label htmlFor="category-name">Nome da Categoria</Label>
@@ -137,12 +139,14 @@ export function CreateCategoryModal({ isOpen, onClose, category }: Props) {
             <Input
               id="category-budget"
               type="number"
+              inputMode="decimal"
+              step={0.01}
               placeholder="Ex: 500.00"
               value={budget}
               onChange={(e) => setBudget(e.target.value)}
             />
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2">
             <Label>Cor</Label>
             <div className="flex flex-wrap gap-2">
               {COLORS.map((c) => (
@@ -150,41 +154,51 @@ export function CreateCategoryModal({ isOpen, onClose, category }: Props) {
                   key={c}
                   type="button"
                   onClick={() => setColor(c)}
-                  className={`w-8 h-8 rounded-full border-2 transition-transform hover:scale-110 ${color === c ? "border-slate-900 scale-110" : "border-transparent"}`}
+                  className={`w-6 h-6 rounded-full border-2 transition-transform hover:scale-110 ${color === c ? "border-primary ring-2 ring-ring scale-110" : "border-border/50"}`}
                   style={{ backgroundColor: c }}
                 />
               ))}
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             <Label>Ícone / Emoji</Label>
-            <div className="grid grid-cols-5 gap-2 border rounded-md p-2">
+            <div className="grid grid-cols-8 gap-1 border border-border rounded-md p-1.5">
               {EMOJIS.map((e) => (
                 <button
                   key={e}
                   type="button"
                   onClick={() => setIcon(e)}
-                  className={`text-2xl p-2 rounded hover:bg-muted ${icon === e ? "bg-slate-200" : ""}`}
+                  className={`text-lg p-1 rounded hover:bg-muted ${icon === e ? "bg-primary/15 ring-1 ring-primary" : ""}`}
                 >
                   {e}
                 </button>
               ))}
             </div>
           </div>
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={mutation.isPending}
-          >
-            {mutation.isPending ? (
-              <Loader2 className="animate-spin" />
-            ) : category ? (
-              "Salvar Alterações"
-            ) : (
-              "Criar Categoria"
-            )}
-          </Button>
+          <div className="flex gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="flex-1"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              className="flex-1"
+              disabled={mutation.isPending}
+            >
+              {mutation.isPending ? (
+                <Loader2 className="animate-spin" />
+              ) : category ? (
+                "Salvar Alterações"
+              ) : (
+                "Criar Categoria"
+              )}
+            </Button>
+          </div>
         </form>
       </div>
     </div>

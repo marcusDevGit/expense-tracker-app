@@ -144,14 +144,19 @@ export function CreateExpenseModal({ isOpen, onClose, initialData }: Props) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md bg-card rounded-xl shadow-2xl p-6 animate-in zoom-in duration-200">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="w-full max-w-md max-h-[92vh] overflow-y-auto bg-card border border-border rounded-xl shadow-2xl p-5 animate-in zoom-in duration-200">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-bold">
             {initialData ? "Duplicar Despesa" : "Nova Despesa"}
           </h2>
-          <Button variant="ghost" onClick={onClose}>
-            <X size={20} />
+          <Button type="button" variant="ghost" size="icon" onClick={onClose}>
+            <X size={18} />
           </Button>
         </div>
         <form
@@ -170,7 +175,7 @@ export function CreateExpenseModal({ isOpen, onClose, initialData }: Props) {
               installments: Number(installments),
             });
           }}
-          className="space-y-4"
+          className="space-y-3"
         >
           <div className="space-y-2">
             <Label>Descrição</Label>
@@ -214,6 +219,7 @@ export function CreateExpenseModal({ isOpen, onClose, initialData }: Props) {
               <Label>Valor</Label>
               <Input
                 type="number"
+                inputMode="decimal"
                 step={0.01}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
@@ -242,7 +248,7 @@ export function CreateExpenseModal({ isOpen, onClose, initialData }: Props) {
           <div className="space-y-2">
             <Label>Carteira</Label>
             <select
-              className="w-full border rounded-md p-2"
+              className="w-full border border-border rounded-md p-2 text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               value={activeWalletId}
               onChange={(e) => setWalletId(e.target.value)}
               required
@@ -258,7 +264,7 @@ export function CreateExpenseModal({ isOpen, onClose, initialData }: Props) {
           <div className="space-y-2">
             <Label>Categoria</Label>
             <select
-              className="w-full border rounded-md p-2"
+              className="w-full border border-border rounded-md p-2 text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               value={categoryId}
               onChange={(e) => {
                 if (e.target.value === "NEW") {
@@ -300,7 +306,7 @@ export function CreateExpenseModal({ isOpen, onClose, initialData }: Props) {
             <div className="space-y-2 animate-in slide-in-from-top-2 duration-200">
               <Label>Recorrência</Label>
               <select
-                className="w-full border rounded-md p-2"
+                className="w-full border border-border rounded-md p-2 text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 value={recurrenceType}
                 onChange={(e) =>
                   setRecurrenceType(
@@ -318,7 +324,7 @@ export function CreateExpenseModal({ isOpen, onClose, initialData }: Props) {
             <div className="space-y-2">
               <Label>Forma de Pagamento</Label>
               <select
-                className="w-full border rounded-md p-2 text-sm"
+                className="w-full border border-border rounded-md p-2 text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
                 required
@@ -343,17 +349,27 @@ export function CreateExpenseModal({ isOpen, onClose, initialData }: Props) {
               />
             </div>
           </div>
-          <Button
-            type="submit"
-            disabled={mutation.isPending}
-            className="w-full"
-          >
-            {mutation.isPending ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              "Salvar Despesa"
-            )}
-          </Button>
+          <div className="flex gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="flex-1"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              disabled={mutation.isPending}
+              className="flex-1"
+            >
+              {mutation.isPending ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                "Salvar Despesa"
+              )}
+            </Button>
+          </div>
         </form>
       </div>
     </div>

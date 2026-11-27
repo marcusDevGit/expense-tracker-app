@@ -80,6 +80,11 @@
 @layer base {
   * {
     @apply border-border;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
   }
   html,
   body,
@@ -91,5 +96,18 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: "Manrope", system-ui, -apple-system, sans-serif;
+  }
+  select,
+  option {
+    @apply bg-background text-foreground;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
   }
 }

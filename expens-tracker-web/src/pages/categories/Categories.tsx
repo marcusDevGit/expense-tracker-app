@@ -251,6 +251,7 @@ export function Categories() {
         )}
       </div>
       <CreateCategoryModal
+        key={editingCategory?.id ?? (isModalOpen ? "new" : "closed")}
         isOpen={isModalOpen}
         onClose={handleClose}
         category={editingCategory}

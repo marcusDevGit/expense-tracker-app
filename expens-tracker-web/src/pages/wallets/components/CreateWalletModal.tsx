@@ -43,11 +43,16 @@ export function CreateWalletModal({ isOpen, onClose }: Props) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md bg-card rounded-xl p-6 shadow-xl animate-in zoom-in duration-200">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="w-full max-w-md max-h-[90vh] overflow-y-auto bg-card border border-border rounded-xl p-6 shadow-xl animate-in zoom-in duration-200">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">Nova Carteira</h2>
-          <Button variant="ghost" onClick={onClose}>
+          <Button type="button" variant="ghost" size="icon" onClick={onClose}>
             <X size={20} />
           </Button>
         </div>
@@ -77,6 +82,7 @@ export function CreateWalletModal({ isOpen, onClose }: Props) {
             <Input
               id="balance"
               type="number"
+              inputMode="decimal"
               step={0.01}
               value={balance}
               onChange={(e) => setBalance(e.target.value)}
@@ -93,17 +99,27 @@ export function CreateWalletModal({ isOpen, onClose }: Props) {
               onChange={(e) => setColor(e.target.value)}
             />
           </div>
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={mutation.isPending}
-          >
-            {mutation.isPending ? (
-              <Loader2 className="animate-spin" />
-            ) : (
-              "Criar Carteira"
-            )}
-          </Button>
+          <div className="flex gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="flex-1"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              className="flex-1"
+              disabled={mutation.isPending}
+            >
+              {mutation.isPending ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                "Criar Carteira"
+              )}
+            </Button>
+          </div>
         </form>
       </div>
     </div>
