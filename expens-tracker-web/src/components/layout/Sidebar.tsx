@@ -60,7 +60,7 @@ export function Sidebar({ className }: { className?: string }) {
         ))}
       </nav>
       <div className="p-4 border-t border-border text-xs text-muted-foreground uppercase tracking-widest font-semibold">
-        Versão 0.4.1
+        Versão 0.4.2
       </div>
     </aside>
   );
