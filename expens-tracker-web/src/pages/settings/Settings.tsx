@@ -25,6 +25,7 @@ import { categoryService } from "@/services/category.service";
 import { userService, type UserProfile } from "@/services/user.service";
 import { dataService } from "@/services/data.service";
 import { PasswordForm } from "./components/PasswordForm";
+import { ImportCsvModal } from "./components/ImportCsvModal";
 import {
   Card,
   CardHeader,
@@ -47,6 +48,7 @@ export function Settings() {
   );
   const settings = useSettingsStore();
   const { toast } = useToast();
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   const { data: profile } = useQuery<UserProfile>({
     queryKey: ["profile"],
@@ -506,11 +508,12 @@ export function Settings() {
                 <span className="text-xs font-semibold">Exportar CSV</span>
               </Button>
               <Button
+                onClick={() => setIsImportModalOpen(true)}
                 variant="outline"
                 className="flex flex-col items-center justify-center h-24 gap-2 border-dashed border-2 hover:border-indigo-500 hover:bg-indigo-50/50 transition-all"
               >
                 <Upload className="text-indigo-600" size={24} />
-                <span className="text-xs font-semibold">Importar OFX/CSV</span>
+                <span className="text-xs font-semibold">Importar CSV</span>
               </Button>
 
               <Button
@@ -549,6 +552,12 @@ export function Settings() {
           </Button>
         </div>
       </div>
+      <ImportCsvModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        wallets={wallets || []}
+        defaultWalletId={defaultWalletId}
+      />
     </PageLayout>
   );
 }

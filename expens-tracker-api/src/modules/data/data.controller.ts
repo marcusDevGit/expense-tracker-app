@@ -20,4 +20,13 @@ export class DataController {
         await dataService.panicReset(userId);
         return res.json(ApiResponse.success(null, "Todas as transações foram apagadas com sucesso!"));
     }
+
+    async import(req: Request, res: Response) {
+        const userId = req.userId!;
+        const { walletId, items } = req.body;
+        const result = await dataService.importExpenses(userId, walletId, items);
+        return res
+            .status(201)
+            .json(ApiResponse.success(result, `${result.importedCount} despesas importadas com sucesso!`));
+    }
 }
